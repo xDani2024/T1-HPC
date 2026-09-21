@@ -1,0 +1,74 @@
+============================================================
+ANÁLISIS MULTIPROCESSING Y MEMORIA
+============================================================
+
+Generando dataset...
+
+Proceso principal
+----------------------------------------
+PID: 15164
+Método de inicio: fork
+Tamaño X: 229.64 MiB
+Tamaño y: 0.76 MiB
+RSS proceso principal: 287.29 MiB
+
+Lanzando joblib con p = 4 procesos...
+
+Información de los workers
+============================================================
+
+Worker asociado a tarea 0
+PID: 15214
+PPID: 15164
+Método de inicio: fork
+Tipo de X: memmap
+Tipo de y: ndarray
+X es memmap: True
+y es memmap: False
+Tamaño lógico X: 229.64 MiB
+Tamaño lógico y: 0.76 MiB
+RSS del worker: 265.85 MiB
+
+Worker asociado a tarea 1
+PID: 15215
+PPID: 15164
+Método de inicio: fork
+Tipo de X: memmap
+Tipo de y: ndarray
+X es memmap: True
+y es memmap: False
+Tamaño lógico X: 229.64 MiB
+Tamaño lógico y: 0.76 MiB
+RSS del worker: 265.85 MiB
+
+Worker asociado a tarea 2
+PID: 15216
+PPID: 15164
+Método de inicio: fork
+Tipo de X: memmap
+Tipo de y: ndarray
+X es memmap: True
+y es memmap: False
+Tamaño lógico X: 229.64 MiB
+Tamaño lógico y: 0.76 MiB
+RSS del worker: 265.85 MiB
+
+Worker asociado a tarea 3
+PID: 15217
+PPID: 15164
+Método de inicio: fork
+Tipo de X: memmap
+Tipo de y: ndarray
+X es memmap: True
+y es memmap: False
+Tamaño lógico X: 229.64 MiB
+Tamaño lógico y: 0.76 MiB
+RSS del worker: 265.85 MiB
+
+
+============================================================
+RESUMEN
+============================================================
+Cantidad de procesos solicitados: 4
+PIDs de workers observados: [15214, 15215, 15216, 15217]
+Cantidad de workers distintos: 4

@@ -1,0 +1,43 @@
+============================================================
+PRUEBA DE REPRODUCIBILIDAD
+============================================================
+
+Generando dataset dos veces...
+X reproducible: True
+y reproducible: True
+beta* reproducible: True
+
+Número de procesos utilizado: p = 1
+
+Ejecutando NumPy - corrida 1...
+Ejecutando NumPy - corrida 2...
+
+NumPy
+----------------------------------------
+Resultados equivalentes: True
+Máxima diferencia: 0.0
+
+Ejecutando sklearn - corrida 1...
+Ejecutando sklearn - corrida 2...
+
+sklearn
+----------------------------------------
+Resultados equivalentes: True
+Máxima diferencia: 0.0
+
+Ejecutando BaggingRegressor - corrida 1...
+Ejecutando BaggingRegressor - corrida 2...
+
+BaggingRegressor
+----------------------------------------
+Resultados equivalentes: True
+Máxima diferencia: 0.0
+
+
+============================================================
+RESUMEN
+============================================================
+Dataset reproducible: True
+NumPy reproducible: True
+sklearn reproducible: True
+BaggingRegressor reproducible: True

@@ -1,0 +1,76 @@
+Generando dataset común...
+
+Número de procesos utilizado: p = 1
+
+Ejecutando bs_numpy...
+Tiempo NumPy: 33.01 s
+
+Ejecutando bs_sklearn...
+Tiempo sklearn: 62.13 s
+
+Ejecutando bs_auto...
+Tiempo auto: 55.03 s
+
+
+============================================================
+ANÁLISIS DE CORRECTITUD
+============================================================
+
+NumPy
+----------------------------------------
+Coeficientes dentro del IC: 267 / 301
+Cobertura: 88.70%
+
+Primeros 5 intervalos:
+beta[0] = -0.610888 | IC = [-0.620947, -0.611416]
+beta[1] = -0.328153 | IC = [-0.328074, -0.315179]
+beta[2] = -0.123201 | IC = [-0.133097, -0.122350]
+beta[3] = 0.812437 | IC = [0.811340, 0.821976]
+beta[4] = 0.224232 | IC = [0.214748, 0.224374]
+
+sklearn
+----------------------------------------
+Coeficientes dentro del IC: 267 / 301
+Cobertura: 88.70%
+
+Primeros 5 intervalos:
+beta[0] = -0.610888 | IC = [-0.620947, -0.611416]
+beta[1] = -0.328153 | IC = [-0.328074, -0.315179]
+beta[2] = -0.123201 | IC = [-0.133097, -0.122350]
+beta[3] = 0.812437 | IC = [0.811340, 0.821976]
+beta[4] = 0.224232 | IC = [0.214748, 0.224374]
+
+BaggingRegressor
+----------------------------------------
+Coeficientes dentro del IC: 268 / 301
+Cobertura: 89.04%
+
+Primeros 5 intervalos:
+beta[0] = -0.610888 | IC = [-0.622291, -0.609957]
+beta[1] = -0.328153 | IC = [-0.327983, -0.315810]
+beta[2] = -0.123201 | IC = [-0.134029, -0.120864]
+beta[3] = 0.812437 | IC = [0.811508, 0.820612]
+beta[4] = 0.224232 | IC = [0.213426, 0.223824]
+
+
+============================================================
+COMPARACIÓN NUMPY VS SKLEARN
+============================================================
+Máxima diferencia entre betas: 1.0769163338864018e-13
+Máxima diferencia IC inferior: 5.81756864903582e-14
+Máxima diferencia IC superior: 6.039613253960852e-14
+
+
+============================================================
+COMPARACIÓN NUMPY VS BAGGINGREGRESSOR
+============================================================
+Diferencia media IC inferior: 0.0011522814645677716
+Diferencia media IC superior: 0.0011981769031236124
+
+
+============================================================
+RESUMEN DE TIEMPOS
+============================================================
+NumPy:             33.01 s
+sklearn:           62.13 s
+BaggingRegressor:  55.03 s
