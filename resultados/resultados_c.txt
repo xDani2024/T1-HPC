@@ -3,13 +3,13 @@ Generando dataset común...
 Número de procesos utilizado: p = 1
 
 Ejecutando bs_numpy...
-Tiempo NumPy: 116.34 s
+Tiempo NumPy: 44.33 s
 
 Ejecutando bs_sklearn...
-Tiempo sklearn: 125.49 s
+Tiempo sklearn: 76.14 s
 
 Ejecutando bs_auto...
-Tiempo auto: 104.80 s
+Tiempo auto: 57.19 s
 
 
 ============================================================
@@ -78,6 +78,6 @@ Diferencia media IC superior: 0.0011981769031240892
 ============================================================
 RESUMEN DE TIEMPOS
 ============================================================
-NumPy:             116.34 s
-sklearn:           125.49 s
-BaggingRegressor:  104.80 s
+NumPy:             44.33 s
+sklearn:           76.14 s
+BaggingRegressor:  57.19 s
