@@ -1,0 +1,27 @@
+============================================================
+COMPARACIÓN INV VS SOLVE
+============================================================
+
+Generando dataset...
+Número de procesos utilizado: p = 1
+
+Ejecutando versión con np.linalg.inv...
+Tiempo inv: 55.75 s
+
+Ejecutando versión con np.linalg.solve...
+Tiempo solve: 58.05 s
+
+
+============================================================
+COMPARACIÓN DE RESULTADOS
+============================================================
+Máxima diferencia entre resultados: 1.199040866595169e-14
+
+
+============================================================
+COMPARACIÓN DE TIEMPOS
+============================================================
+np.linalg.inv:   55.75 s
+np.linalg.solve: 58.05 s
+Diferencia:      -2.30 s
+Variación respecto de inv: -4.13%

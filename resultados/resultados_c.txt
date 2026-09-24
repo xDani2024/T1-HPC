@@ -3,13 +3,13 @@ Generando dataset común...
 Número de procesos utilizado: p = 1
 
 Ejecutando bs_numpy...
-Tiempo NumPy: 33.01 s
+Tiempo NumPy: 116.34 s
 
 Ejecutando bs_sklearn...
-Tiempo sklearn: 62.13 s
+Tiempo sklearn: 125.49 s
 
 Ejecutando bs_auto...
-Tiempo auto: 55.03 s
+Tiempo auto: 104.80 s
 
 
 ============================================================
@@ -69,8 +69,15 @@ Diferencia media IC superior: 0.0011981769031236124
 
 
 ============================================================
+COMPARACIÓN SKLEARN VS BAGGINGREGRESSOR
+============================================================
+Diferencia media IC inferior: 0.0011522814645689376
+Diferencia media IC superior: 0.0011981769031240892
+
+
+============================================================
 RESUMEN DE TIEMPOS
 ============================================================
-NumPy:             33.01 s
-sklearn:           62.13 s
-BaggingRegressor:  55.03 s
+NumPy:             116.34 s
+sklearn:           125.49 s
+BaggingRegressor:  104.80 s

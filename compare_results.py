@@ -233,6 +233,36 @@ def run_analysis():
         mean_upper_difference
     )
 
+    # Comparación sklearn vs BaggingRegressor
+    print("\n")
+    print("=" * 60)
+    print("COMPARACIÓN SKLEARN VS BAGGINGREGRESSOR")
+    print("=" * 60)
+
+    mean_lower_difference_sklearn_auto = np.mean(
+        np.abs(
+            lower_sklearn
+            - lower_auto
+        )
+    )
+
+    mean_upper_difference_sklearn_auto = np.mean(
+        np.abs(
+            upper_sklearn
+            - upper_auto
+        )
+    )
+
+    print(
+        "Diferencia media IC inferior:",
+        mean_lower_difference_sklearn_auto
+    )
+
+    print(
+        "Diferencia media IC superior:",
+        mean_upper_difference_sklearn_auto
+    )
+
     # Resumen de tiempos
     print("\n")
     print("=" * 60)
