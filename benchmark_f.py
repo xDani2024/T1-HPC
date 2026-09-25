@@ -1,9 +1,31 @@
+# ============================================================
+# IMPORTANTE:
+# Estas variables deben definirse ANTES de importar NumPy,
+# sklearn o los scripts que los utilizan.
+# ============================================================
+
+import os
+
+THREAD_LIMIT = 1
+
+os.environ["OMP_NUM_THREADS"] = str(THREAD_LIMIT)
+os.environ["OPENBLAS_NUM_THREADS"] = str(THREAD_LIMIT)
+os.environ["MKL_NUM_THREADS"] = str(THREAD_LIMIT)
+os.environ["NUMEXPR_NUM_THREADS"] = str(THREAD_LIMIT)
+os.environ["VECLIB_MAXIMUM_THREADS"] = str(THREAD_LIMIT)
+os.environ["BLIS_NUM_THREADS"] = str(THREAD_LIMIT)
+
+
+# ============================================================
+# IMPORTS
+# ============================================================
+
 import csv
 import gc
-import os
 import platform
-from datetime import datetime
+
 from time import perf_counter, sleep
+from threadpoolctl import threadpool_limits
 
 from common import (
     N,
@@ -21,11 +43,8 @@ from bs_auto import bootstrap_auto
 # CONFIGURACIÓN
 # ============================================================
 
-# Pequeña pausa entre pruebas para evitar encadenarlas
-# inmediatamente.
 PAUSA_ENTRE_PRUEBAS = 1.0
 
-# Carpeta de resultados
 RESULTADOS_DIR = "resultados"
 
 TXT_PATH = os.path.join(
@@ -38,18 +57,22 @@ CSV_PATH = os.path.join(
     "resultados_f.csv"
 )
 
+CHECKPOINT_PATH = os.path.join(
+    RESULTADOS_DIR,
+    "resultados_f_checkpoint.csv"
+)
+
+
+# Si el programa se interrumpe y luego lo vuelves a ejecutar,
+# continuará desde donde quedó.
+REANUDAR = True
+
 
 # ============================================================
 # INFORMACIÓN DEL COMPUTADOR
 # ============================================================
 
 def get_cpu_model():
-    """
-    Intenta obtener el modelo del procesador.
-
-    Funciona bien en Linux/WSL leyendo /proc/cpuinfo.
-    Si no está disponible, utiliza platform.processor().
-    """
 
     try:
 
@@ -64,7 +87,8 @@ def get_cpu_model():
                 if "model name" in line:
 
                     return (
-                        line.split(":", 1)[1]
+                        line
+                        .split(":", 1)[1]
                         .strip()
                     )
 
@@ -80,7 +104,164 @@ def get_cpu_model():
 
 
 # ============================================================
-# MEDICIÓN DE UNA IMPLEMENTACIÓN
+# CREAR ESTRUCTURA DE RESULTADOS
+# ============================================================
+
+def crear_resultados_vacios(p_max):
+
+    resultados = []
+
+    for p in range(1, p_max + 1):
+
+        resultados.append(
+            {
+                "p": p,
+                "numpy": None,
+                "sklearn": None,
+                "auto": None,
+            }
+        )
+
+    return resultados
+
+
+# ============================================================
+# CHECKPOINT
+# ============================================================
+
+def guardar_checkpoint(resultados):
+
+    with open(
+        CHECKPOINT_PATH,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as file:
+
+        writer = csv.DictWriter(
+            file,
+            fieldnames=[
+                "p",
+                "numpy",
+                "sklearn",
+                "auto",
+                "thread_limit",
+            ]
+        )
+
+        writer.writeheader()
+
+        for row in resultados:
+
+            writer.writerow(
+                {
+                    "p": row["p"],
+
+                    "numpy":
+                        ""
+                        if row["numpy"] is None
+                        else row["numpy"],
+
+                    "sklearn":
+                        ""
+                        if row["sklearn"] is None
+                        else row["sklearn"],
+
+                    "auto":
+                        ""
+                        if row["auto"] is None
+                        else row["auto"],
+
+                    "thread_limit":
+                        THREAD_LIMIT,
+                }
+            )
+
+
+def cargar_checkpoint(resultados):
+
+    if not REANUDAR:
+
+        return resultados
+
+    if not os.path.exists(
+        CHECKPOINT_PATH
+    ):
+
+        return resultados
+
+    print(
+        "\nCheckpoint encontrado."
+    )
+
+    print(
+        "Se intentará continuar desde "
+        "la última medición terminada."
+    )
+
+    with open(
+        CHECKPOINT_PATH,
+        "r",
+        encoding="utf-8"
+    ) as file:
+
+        reader = csv.DictReader(file)
+
+        filas = list(reader)
+
+    # Verificar que corresponde al mismo
+    # límite de threads.
+    if filas:
+
+        limite_guardado = int(
+            filas[0]["thread_limit"]
+        )
+
+        if limite_guardado != THREAD_LIMIT:
+
+            print(
+                "\nEl checkpoint corresponde "
+                "a otra configuración."
+            )
+
+            print(
+                "Se ignorará y se comenzará "
+                "desde cero."
+            )
+
+            return resultados
+
+    mapa = {
+        row["p"]: row
+        for row in resultados
+    }
+
+    for fila in filas:
+
+        p = int(fila["p"])
+
+        if p not in mapa:
+            continue
+
+        for clave in [
+            "numpy",
+            "sklearn",
+            "auto",
+        ]:
+
+            valor = fila[clave]
+
+            if valor != "":
+
+                mapa[p][clave] = float(
+                    valor
+                )
+
+    return resultados
+
+
+# ============================================================
+# MEDIR UNA IMPLEMENTACIÓN
 # ============================================================
 
 def medir_tiempo(
@@ -90,26 +271,42 @@ def medir_tiempo(
     y,
     p
 ):
-    """
-    Ejecuta una implementación bootstrap
-    con p procesos y mide su tiempo total.
-    """
+
+    print()
 
     print(
-        f"  {nombre:<18} "
-        f"| p = {p:>2} "
-        f"| ejecutando...",
-        end="",
-        flush=True
+        f"Ejecutando {nombre}"
+    )
+
+    print(
+        f"p = {p}"
+    )
+
+    print(
+        f"Threads internos máximos = "
+        f"{THREAD_LIMIT}"
+    )
+
+    gc.collect()
+
+    sleep(
+        PAUSA_ENTRE_PRUEBAS
     )
 
     inicio = perf_counter()
 
-    betas = funcion(
-        X,
-        y,
-        p
-    )
+    # Segundo mecanismo de seguridad:
+    # además de las variables de entorno,
+    # limitamos los threadpools cargados.
+    with threadpool_limits(
+        limits=THREAD_LIMIT
+    ):
+
+        betas = funcion(
+            X,
+            y,
+            p
+        )
 
     tiempo = (
         perf_counter()
@@ -117,17 +314,28 @@ def medir_tiempo(
     )
 
     print(
-        f"\r  {nombre:<18} "
-        f"| p = {p:>2} "
-        f"| {tiempo:>8.2f} s"
+        f"Tiempo = {tiempo:.2f} s"
     )
 
-    # Ya no necesitamos las estimaciones para este ítem.
+    # Ya no necesitamos las estimaciones
+    # bootstrap para el ítem (f).
     del betas
 
     gc.collect()
 
     return tiempo
+
+
+# ============================================================
+# FORMATEAR TIEMPOS
+# ============================================================
+
+def formato_tiempo(valor):
+
+    if valor is None:
+        return "pendiente"
+
+    return f"{valor:.2f}"
 
 
 # ============================================================
@@ -147,7 +355,8 @@ def guardar_txt(
     ) as file:
 
         file.write(
-            "=" * 72 + "\n"
+            "=" * 74
+            + "\n"
         )
 
         file.write(
@@ -156,11 +365,12 @@ def guardar_txt(
         )
 
         file.write(
-            "=" * 72 + "\n\n"
+            "=" * 74
+            + "\n\n"
         )
 
         # ----------------------------------------------------
-        # Información del computador
+        # Computador
         # ----------------------------------------------------
 
         file.write(
@@ -168,11 +378,13 @@ def guardar_txt(
         )
 
         file.write(
-            "-" * 72 + "\n"
+            "-" * 74
+            + "\n"
         )
 
         file.write(
-            f"Procesador: {cpu_model}\n"
+            f"Procesador: "
+            f"{cpu_model}\n"
         )
 
         file.write(
@@ -186,6 +398,12 @@ def guardar_txt(
             f"{p_max}\n"
         )
 
+        file.write(
+            f"Threads internos máximos "
+            f"por proceso: "
+            f"{THREAD_LIMIT}\n"
+        )
+
         file.write("\n")
 
         # ----------------------------------------------------
@@ -197,7 +415,8 @@ def guardar_txt(
         )
 
         file.write(
-            "-" * 72 + "\n"
+            "-" * 74
+            + "\n"
         )
 
         file.write(
@@ -214,13 +433,20 @@ def guardar_txt(
 
         file.write(
             f"Valores de p evaluados: "
-            f"1 a {p_max}\n"
+            f"1, 2, ..., {p_max}\n"
+        )
+
+        file.write(
+            "Los threads internos de "
+            "NumPy/BLAS se fijaron en "
+            "t = 1 para aislar el efecto "
+            "del número de procesos p.\n"
         )
 
         file.write("\n")
 
         # ----------------------------------------------------
-        # Tabla principal
+        # Tabla
         # ----------------------------------------------------
 
         file.write(
@@ -228,35 +454,56 @@ def guardar_txt(
         )
 
         file.write(
-            "-" * 72 + "\n"
+            "-" * 74
+            + "\n"
         )
 
         file.write(
             f"{'p':>4} | "
-            f"{'NumPy [s]':>14} | "
-            f"{'sklearn [s]':>14} | "
-            f"{'Bagging [s]':>14}\n"
+            f"{'NumPy [s]':>16} | "
+            f"{'sklearn [s]':>16} | "
+            f"{'Bagging [s]':>16}\n"
         )
 
         file.write(
-            "-" * 72 + "\n"
+            "-" * 74
+            + "\n"
         )
 
         for row in resultados:
 
+            numpy_str = (
+                formato_tiempo(
+                    row["numpy"]
+                )
+            )
+
+            sklearn_str = (
+                formato_tiempo(
+                    row["sklearn"]
+                )
+            )
+
+            auto_str = (
+                formato_tiempo(
+                    row["auto"]
+                )
+            )
+
             file.write(
                 f"{row['p']:>4} | "
-                f"{row['numpy']:>14.2f} | "
-                f"{row['sklearn']:>14.2f} | "
-                f"{row['auto']:>14.2f}\n"
+                f"{numpy_str:>16} | "
+                f"{sklearn_str:>16} | "
+                f"{auto_str:>16}\n"
             )
 
         file.write(
-            "-" * 72 + "\n\n"
+            "-" * 74
+            + "\n\n"
         )
 
         # ----------------------------------------------------
-        # Formato simple p -> t
+        # Detalle
         # ----------------------------------------------------
 
         file.write(
@@ -264,19 +511,26 @@ def guardar_txt(
         )
 
         file.write(
-            "=" * 72 + "\n\n"
+            "=" * 74
+            + "\n\n"
         )
 
-        nombres = [
-            ("NumPy", "numpy"),
-            ("sklearn", "sklearn"),
+        implementaciones = [
+            (
+                "NumPy",
+                "numpy"
+            ),
+            (
+                "sklearn",
+                "sklearn"
+            ),
             (
                 "BaggingRegressor",
                 "auto"
             ),
         ]
 
-        for nombre, clave in nombres:
+        for nombre, clave in implementaciones:
 
             file.write(
                 f"{nombre}\n"
@@ -289,17 +543,26 @@ def guardar_txt(
 
             for row in resultados:
 
-                file.write(
-                    f"p = {row['p']:>2} "
-                    f"-> "
-                    f"t = "
-                    f"{row[clave]:.2f} s\n"
-                )
+                if row[clave] is None:
+
+                    file.write(
+                        f"p = {row['p']:>2} "
+                        f"-> pendiente\n"
+                    )
+
+                else:
+
+                    file.write(
+                        f"p = {row['p']:>2} "
+                        f"-> "
+                        f"T(p) = "
+                        f"{row[clave]:.2f} s\n"
+                    )
 
             file.write("\n")
 
         # ----------------------------------------------------
-        # Mejor tiempo observado
+        # Mejores tiempos disponibles
         # ----------------------------------------------------
 
         file.write(
@@ -307,13 +570,29 @@ def guardar_txt(
         )
 
         file.write(
-            "-" * 72 + "\n"
+            "-" * 74
+            + "\n"
         )
 
-        for nombre, clave in nombres:
+        for nombre, clave in implementaciones:
+
+            validos = [
+                row
+                for row in resultados
+                if row[clave] is not None
+            ]
+
+            if not validos:
+
+                file.write(
+                    f"{nombre:<18}: "
+                    f"sin resultados aún\n"
+                )
+
+                continue
 
             mejor = min(
-                resultados,
+                validos,
                 key=lambda row:
                     row[clave]
             )
@@ -321,17 +600,16 @@ def guardar_txt(
             file.write(
                 f"{nombre:<18}: "
                 f"{mejor[clave]:.2f} s "
-                f"con p = {mejor['p']}\n"
+                f"con p = "
+                f"{mejor['p']}\n"
             )
 
 
 # ============================================================
-# GUARDAR CSV
+# GUARDAR CSV FINAL
 # ============================================================
 
-def guardar_csv(
-    resultados
-):
+def guardar_csv(resultados):
 
     with open(
         CSV_PATH,
@@ -347,13 +625,103 @@ def guardar_csv(
                 "numpy",
                 "sklearn",
                 "auto",
+                "thread_limit",
             ]
         )
 
         writer.writeheader()
 
-        writer.writerows(
-            resultados
+        for row in resultados:
+
+            writer.writerow(
+                {
+                    "p": row["p"],
+                    "numpy": row["numpy"],
+                    "sklearn": row["sklearn"],
+                    "auto": row["auto"],
+                    "thread_limit":
+                        THREAD_LIMIT,
+                }
+            )
+
+
+# ============================================================
+# GUARDAR AVANCE
+# ============================================================
+
+def guardar_avance(
+    resultados,
+    p_max,
+    cpu_model
+):
+
+    guardar_checkpoint(
+        resultados
+    )
+
+    guardar_txt(
+        resultados,
+        p_max,
+        cpu_model
+    )
+
+
+# ============================================================
+# MOSTRAR RESUMEN
+# ============================================================
+
+def mostrar_resumen(resultados):
+
+    print()
+
+    print(
+        "=" * 74
+    )
+
+    print(
+        "RESUMEN ACTUAL"
+    )
+
+    print(
+        "=" * 74
+    )
+
+    print(
+        f"{'p':>4} | "
+        f"{'NumPy [s]':>14} | "
+        f"{'sklearn [s]':>14} | "
+        f"{'Bagging [s]':>14}"
+    )
+
+    print(
+        "-" * 68
+    )
+
+    for row in resultados:
+
+        numpy_str = (
+            "-"
+            if row["numpy"] is None
+            else f"{row['numpy']:.2f}"
+        )
+
+        sklearn_str = (
+            "-"
+            if row["sklearn"] is None
+            else f"{row['sklearn']:.2f}"
+        )
+
+        auto_str = (
+            "-"
+            if row["auto"] is None
+            else f"{row['auto']:.2f}"
+        )
+
+        print(
+            f"{row['p']:>4} | "
+            f"{numpy_str:>14} | "
+            f"{sklearn_str:>14} | "
+            f"{auto_str:>14}"
         )
 
 
@@ -369,18 +737,20 @@ def main():
     )
 
     # --------------------------------------------------------
-    # Información del computador
+    # Información del sistema
     # --------------------------------------------------------
 
-    p_max = os.cpu_count()
+    p_max = (
+        os.cpu_count()
+        or 1
+    )
 
-    if p_max is None:
-        p_max = 1
-
-    cpu_model = get_cpu_model()
+    cpu_model = (
+        get_cpu_model()
+    )
 
     print(
-        "=" * 72
+        "=" * 74
     )
 
     print(
@@ -389,7 +759,7 @@ def main():
     )
 
     print(
-        "=" * 72
+        "=" * 74
     )
 
     print(
@@ -403,19 +773,48 @@ def main():
     )
 
     print(
-        f"Se evaluará p = "
-        f"1, 2, ..., {p_max}"
+        f"Threads internos fijados: "
+        f"{THREAD_LIMIT}"
+    )
+
+    print(
+        f"Se evaluará "
+        f"p = 1, 2, ..., {p_max}"
     )
 
     # --------------------------------------------------------
-    # Generar los datos UNA sola vez
+    # Resultados / posible checkpoint
+    # --------------------------------------------------------
+
+    resultados = (
+        crear_resultados_vacios(
+            p_max
+        )
+    )
+
+    resultados = (
+        cargar_checkpoint(
+            resultados
+        )
+    )
+
+    mostrar_resumen(
+        resultados
+    )
+
+    # --------------------------------------------------------
+    # Dataset común
     # --------------------------------------------------------
 
     print(
         "\nGenerando dataset..."
     )
 
-    X, y, beta_true = generate_data()
+    X, y, beta_true = (
+        generate_data()
+    )
+
+    del beta_true
 
     print(
         f"X: {X.shape}"
@@ -429,121 +828,146 @@ def main():
         "Dataset generado correctamente."
     )
 
-    # beta_true no se necesita para medir tiempos.
-    del beta_true
-
     # --------------------------------------------------------
-    # Ejecutar experimentos
+    # Implementaciones
     # --------------------------------------------------------
 
-    resultados = []
-
-    print(
-        "\n"
-        + "=" * 72
-    )
-
-    print(
-        "INICIO DE LAS MEDICIONES"
-    )
-
-    print(
-        "=" * 72
-    )
+    implementaciones = [
+        (
+            "NumPy",
+            "numpy",
+            bootstrap_numpy
+        ),
+        (
+            "sklearn",
+            "sklearn",
+            bootstrap_sklearn
+        ),
+        (
+            "BaggingRegressor",
+            "auto",
+            bootstrap_auto
+        ),
+    ]
 
     total_pruebas = (
-        p_max * 3
+        p_max
+        * len(implementaciones)
     )
 
-    prueba_actual = 0
-
-    for p in range(
-        1,
-        p_max + 1
-    ):
-
-        print(
-            f"\n--- p = {p} / "
-            f"{p_max} ---"
-        )
-
-        # NumPy
-        prueba_actual += 1
-
-        print(
-            f"[{prueba_actual}/"
-            f"{total_pruebas}]",
-            end=" "
-        )
-
-        tiempo_numpy = medir_tiempo(
-            "NumPy",
-            bootstrap_numpy,
-            X,
-            y,
-            p
-        )
-
-        sleep(
-            PAUSA_ENTRE_PRUEBAS
-        )
-
-        # sklearn
-        prueba_actual += 1
-
-        print(
-            f"[{prueba_actual}/"
-            f"{total_pruebas}]",
-            end=" "
-        )
-
-        tiempo_sklearn = medir_tiempo(
+    completadas = sum(
+        row[clave] is not None
+        for row in resultados
+        for clave in [
+            "numpy",
             "sklearn",
-            bootstrap_sklearn,
-            X,
-            y,
-            p
-        )
-
-        sleep(
-            PAUSA_ENTRE_PRUEBAS
-        )
-
-        # BaggingRegressor
-        prueba_actual += 1
-
-        print(
-            f"[{prueba_actual}/"
-            f"{total_pruebas}]",
-            end=" "
-        )
-
-        tiempo_auto = medir_tiempo(
-            "BaggingRegressor",
-            bootstrap_auto,
-            X,
-            y,
-            p
-        )
-
-        sleep(
-            PAUSA_ENTRE_PRUEBAS
-        )
-
-        resultados.append(
-            {
-                "p": p,
-                "numpy":
-                    tiempo_numpy,
-                "sklearn":
-                    tiempo_sklearn,
-                "auto":
-                    tiempo_auto,
-            }
-        )
+            "auto",
+        ]
+    )
 
     # --------------------------------------------------------
-    # Guardar resultados
+    # Benchmark
+    # --------------------------------------------------------
+
+    try:
+
+        for row in resultados:
+
+            p = row["p"]
+
+            print()
+
+            print(
+                "=" * 74
+            )
+
+            print(
+                f"p = {p} / {p_max}"
+            )
+
+            print(
+                "=" * 74
+            )
+
+            for (
+                nombre,
+                clave,
+                funcion
+            ) in implementaciones:
+
+                # Si ya está medido,
+                # no repetirlo.
+                if row[clave] is not None:
+
+                    print(
+                        f"{nombre}: "
+                        f"ya medido "
+                        f"({row[clave]:.2f} s)"
+                    )
+
+                    continue
+
+                print(
+                    f"\nPrueba "
+                    f"{completadas + 1}"
+                    f"/{total_pruebas}"
+                )
+
+                tiempo = medir_tiempo(
+                    nombre,
+                    funcion,
+                    X,
+                    y,
+                    p
+                )
+
+                row[clave] = tiempo
+
+                completadas += 1
+
+                # Guardar inmediatamente.
+                guardar_avance(
+                    resultados,
+                    p_max,
+                    cpu_model
+                )
+
+                print(
+                    "Resultado guardado."
+                )
+
+            mostrar_resumen(
+                resultados
+            )
+
+    except KeyboardInterrupt:
+
+        print(
+            "\n\nEjecución interrumpida "
+            "por el usuario."
+        )
+
+        print(
+            "Los resultados ya terminados "
+            "quedaron guardados."
+        )
+
+        print(
+            "Puedes volver a ejecutar "
+            "benchmark_f.py y continuará "
+            "desde el checkpoint."
+        )
+
+        guardar_avance(
+            resultados,
+            p_max,
+            cpu_model
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # Final
     # --------------------------------------------------------
 
     guardar_txt(
@@ -556,45 +980,36 @@ def main():
         resultados
     )
 
-    # --------------------------------------------------------
-    # Resumen por consola
-    # --------------------------------------------------------
+    # Ya no necesitamos el checkpoint
+    # si todo terminó correctamente.
+    if os.path.exists(
+        CHECKPOINT_PATH
+    ):
 
-    print(
-        "\n"
-        + "=" * 72
-    )
-
-    print(
-        "RESULTADOS"
-    )
-
-    print(
-        "=" * 72
-    )
-
-    print(
-        f"\n{'p':>4} | "
-        f"{'NumPy [s]':>12} | "
-        f"{'sklearn [s]':>12} | "
-        f"{'Bagging [s]':>12}"
-    )
-
-    print(
-        "-" * 52
-    )
-
-    for row in resultados:
-
-        print(
-            f"{row['p']:>4} | "
-            f"{row['numpy']:>12.2f} | "
-            f"{row['sklearn']:>12.2f} | "
-            f"{row['auto']:>12.2f}"
+        os.remove(
+            CHECKPOINT_PATH
         )
 
+    print()
+
     print(
-        "\nArchivos guardados:"
+        "=" * 74
+    )
+
+    print(
+        "ÍTEM (f) TERMINADO"
+    )
+
+    print(
+        "=" * 74
+    )
+
+    mostrar_resumen(
+        resultados
+    )
+
+    print(
+        "\nArchivos finales:"
     )
 
     print(
@@ -605,10 +1020,7 @@ def main():
         f"  {CSV_PATH}"
     )
 
-    print(
-        "\nÍtem (f) terminado."
-    )
-
 
 if __name__ == "__main__":
+
     main()
