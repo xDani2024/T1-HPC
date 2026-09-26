@@ -3,7 +3,7 @@
 Cores lógicos disponibles: 8
 Valores de p inspeccionados: [1, 2, 4, 8]
 Valores de p ejecutados: [1, 4]
-Timeout por ejecución: 180 s
+Timeout por ejecución: 600 s
 
 Durante las ejecuciones originales y limitadas se debe observar htop en una segunda terminal.
 
@@ -16,7 +16,7 @@ INSPECCIÓN DE THREADS - p = 1
 ======================================================================
 Cores lógicos disponibles: 8
 
-Worker 0 | PID 11559
+Worker 0 | PID 18725
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
@@ -31,11 +31,11 @@ INSPECCIÓN DE THREADS - p = 2
 ======================================================================
 Cores lógicos disponibles: 8
 
-Worker 0 | PID 11566
+Worker 0 | PID 18732
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 1 | PID 11567
+Worker 1 | PID 18733
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
@@ -50,19 +50,19 @@ INSPECCIÓN DE THREADS - p = 4
 ======================================================================
 Cores lógicos disponibles: 8
 
-Worker 0 | PID 11581
+Worker 0 | PID 18747
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 1 | PID 11582
+Worker 1 | PID 18748
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 2 | PID 11583
+Worker 2 | PID 18749
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 3 | PID 11584
+Worker 3 | PID 18750
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
@@ -77,35 +77,35 @@ INSPECCIÓN DE THREADS - p = 8
 ======================================================================
 Cores lógicos disponibles: 8
 
-Worker 0 | PID 11606
+Worker 0 | PID 18811
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 1 | PID 11607
+Worker 1 | PID 18812
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 2 | PID 11608
+Worker 2 | PID 18813
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 3 | PID 11609
+Worker 3 | PID 18814
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 4 | PID 11610
+Worker 4 | PID 18815
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 5 | PID 11611
+Worker 5 | PID 18816
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 6 | PID 11612
+Worker 6 | PID 18817
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
-Worker 7 | PID 11613
+Worker 7 | PID 18818
   API=blas | backend=mkl | threads=4
   API=openmp | backend=openmp | threads=8
 
@@ -126,8 +126,58 @@ EJECUCIÓN ORIGINAL - p = 1
 ======================================================================
 Sin límite manual de threads internos.
 Estado: completado
-Tiempo: 9.72 s
-Memoria disponible antes: 2326.41 MB
-Memoria disponible después: 2074.86 MB
+Tiempo: 21.78 s
+Memoria disponible antes: 2380.17 MB
+Memoria disponible después: 2150.04 MB
 
 Iniciando ejecución original con p=4. Observar htop ahora.
+
+======================================================================
+EJECUCIÓN ORIGINAL - p = 4
+======================================================================
+Sin límite manual de threads internos.
+Estado: detenido después de 600 s
+
+######################################################################
+3. EJECUCIÓN LIMITADA A t=1
+######################################################################
+
+Iniciando ejecución limitada con p=1. Observar htop ahora.
+
+======================================================================
+EJECUCIÓN LIMITADA t=1 - p = 1
+======================================================================
+Threads internos limitados a t=1.
+Estado: completado
+Tiempo: 39.49 s
+Memoria disponible antes: 2369.30 MB
+Memoria disponible después: 2160.82 MB
+p*t = 1*1 = 1
+Cores lógicos: 8
+
+Iniciando ejecución limitada con p=4. Observar htop ahora.
+
+======================================================================
+EJECUCIÓN LIMITADA t=1 - p = 4
+======================================================================
+Threads internos limitados a t=1.
+Estado: completado
+Tiempo: 16.29 s
+Memoria disponible antes: 2444.74 MB
+Memoria disponible después: 1831.40 MB
+p*t = 4*1 = 4
+Cores lógicos: 8
+
+######################################################################
+4. RESUMEN
+######################################################################
+Sin indicio potencial de oversubscription: p = [1, 2]
+Con indicio potencial de oversubscription: p = [4, 8]
+Corrección utilizada: threadpool_limits(limits=1).
+Con t=1, el paralelismo potencial queda dado por p*t=p.
+
+======================================================================
+EXPERIMENTO FINALIZADO
+======================================================================
+TXT guardado en: resultados/resultados_e.txt
+CSV guardado en: resultados/resultados_e.csv

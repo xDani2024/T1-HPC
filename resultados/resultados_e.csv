@@ -1,0 +1,9 @@
+tipo,p,t,p_t,cores_logicos,oversubscription,tiempo_s,estado,memoria_inicial_mb,memoria_final_mb
+inspect,1,4,4,8,False,,,,
+inspect,2,4,8,8,False,,,,
+inspect,4,4,16,8,True,,,,
+inspect,8,4,32,8,True,,,,
+original,1,,,8,,21.7782,completado,2380.17,2150.04
+original,4,,,8,,,detenido después de 600 s,,
+limited,1,1,1,8,False,39.4943,completado,2369.3,2160.82
+limited,4,1,4,8,False,16.2915,completado,2444.74,1831.4
