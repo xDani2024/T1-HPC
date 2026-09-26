@@ -57,7 +57,7 @@ P_EJECUCION = [
 
 # Tiempo máximo permitido para cada ejecución
 # original o limitada.
-TIMEOUT_SEGUNDOS = 180
+TIMEOUT_SEGUNDOS = 600 # 10 minutos como máximo
 
 
 # ============================================================
