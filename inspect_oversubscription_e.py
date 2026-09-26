@@ -1,27 +1,70 @@
 # ============================================================
 # ÍTEM (e) - Oversubscription en bs_numpy.py
 # ============================================================
+#
+# EJECUCIÓN:
+#
+#     python inspect_oversubscription_e.py
+#
+# RESULTADOS:
+#
+#     resultados/resultados_e.txt
+#     resultados/resultados_e.csv
+#
+# Mientras corre, abrir otra terminal y ejecutar:
+#
+#     htop
+#
+# ============================================================
 
 import os
 import sys
+import csv
+import json
+import signal
+import subprocess
 from pathlib import Path
 
 
 # ============================================================
-# CONFIGURACIÓN
+# CONFIGURACIÓN GENERAL
 # ============================================================
 
 RESULTADOS_DIR = Path("resultados")
+
 TXT_PATH = RESULTADOS_DIR / "resultados_e.txt"
+CSV_PATH = RESULTADOS_DIR / "resultados_e.csv"
+
+# Archivo temporal usado para comunicar
+# los resultados de los procesos hijos.
+TEMP_PATH = RESULTADOS_DIR / "_resultado_e_temp.json"
 
 P_MAX = os.cpu_count() or 1
 
+# Valores representativos para inspeccionar.
+P_INSPECCION = [
+    p for p in [1, 2, 4, 8]
+    if p <= P_MAX
+]
+
+# Casos suficientes para observar el programa:
+# - p=1: referencia
+# - p=4: caso con oversubscription potencial
+P_EJECUCION = [
+    p for p in [1, 4]
+    if p <= P_MAX
+]
+
+# Tiempo máximo permitido para cada ejecución
+# original o limitada.
+TIMEOUT_SEGUNDOS = 600 # 10 minutos como máximo
+
 
 # ============================================================
-# GUARDAR Y MOSTRAR RESULTADOS
+# UTILIDADES
 # ============================================================
 
-def log(texto=""):
+def escribir_txt(texto=""):
 
     RESULTADOS_DIR.mkdir(
         exist_ok=True
@@ -33,11 +76,89 @@ def log(texto=""):
         TXT_PATH,
         "a",
         encoding="utf-8"
-    ) as f:
+    ) as archivo:
 
-        f.write(
+        archivo.write(
             str(texto) + "\n"
         )
+
+
+def guardar_temporal(datos):
+
+    RESULTADOS_DIR.mkdir(
+        exist_ok=True
+    )
+
+    with open(
+        TEMP_PATH,
+        "w",
+        encoding="utf-8"
+    ) as archivo:
+
+        json.dump(
+            datos,
+            archivo,
+            indent=4
+        )
+
+
+def leer_temporal():
+
+    if not TEMP_PATH.exists():
+
+        return None
+
+    with open(
+        TEMP_PATH,
+        "r",
+        encoding="utf-8"
+    ) as archivo:
+
+        datos = json.load(
+            archivo
+        )
+
+    TEMP_PATH.unlink(
+        missing_ok=True
+    )
+
+    return datos
+
+
+# ============================================================
+# INFORMACIÓN SIMPLE DE MEMORIA EN WSL/LINUX
+# ============================================================
+
+def memoria_disponible_mb():
+
+    try:
+
+        with open(
+            "/proc/meminfo",
+            "r",
+            encoding="utf-8"
+        ) as archivo:
+
+            for linea in archivo:
+
+                if linea.startswith(
+                    "MemAvailable:"
+                ):
+
+                    kb = int(
+                        linea.split()[1]
+                    )
+
+                    return round(
+                        kb / 1024,
+                        2
+                    )
+
+    except Exception:
+
+        pass
+
+    return None
 
 
 # ============================================================
@@ -46,19 +167,18 @@ def log(texto=""):
 
 def inspeccionar_worker(worker_id):
 
-    import os
     import numpy as np
 
     from threadpoolctl import (
         threadpool_info
     )
 
-    # Forzar una operación de álgebra lineal
-    # para inicializar BLAS/MKL.
     rng = np.random.default_rng(
         1000 + worker_id
     )
 
+    # Pequeña operación para inicializar
+    # las librerías numéricas.
     A = rng.normal(
         size=(200, 200)
     )
@@ -74,35 +194,24 @@ def inspeccionar_worker(worker_id):
 
     info = threadpool_info()
 
-    return (
-        worker_id,
-        os.getpid(),
-        info
-    )
+    return {
+        "worker": worker_id,
+        "pid": os.getpid(),
+        "pools": info
+    }
 
 
 # ============================================================
-# MODO 1: INSPECCIÓN
+# PROCESO HIJO: INSPECCIÓN
 # ============================================================
 
-def inspeccionar(p):
+def child_inspect(p):
 
     from joblib import (
         Parallel,
         delayed
     )
 
-    log()
-    log("=" * 70)
-    log(f"INSPECCIÓN DE THREADS - p = {p}")
-    log("=" * 70)
-
-    log(
-        f"Cores lógicos disponibles: {P_MAX}"
-    )
-
-    # Se ejecuta threadpool_info dentro
-    # de cada proceso worker.
     resultados = Parallel(
         n_jobs=p,
         backend="multiprocessing"
@@ -117,18 +226,17 @@ def inspeccionar(p):
     threads_blas = []
     threads_openmp = []
 
-    for (
-        worker_id,
-        pid,
-        pools
-    ) in resultados:
+    workers = []
 
-        log()
-        log(
-            f"Worker {worker_id} | PID {pid}"
-        )
+    for resultado in resultados:
 
-        for pool in pools:
+        worker = {
+            "worker": resultado["worker"],
+            "pid": resultado["pid"],
+            "pools": []
+        }
+
+        for pool in resultado["pools"]:
 
             api = pool.get(
                 "user_api"
@@ -142,11 +250,11 @@ def inspeccionar(p):
                 "num_threads"
             )
 
-            log(
-                f"  API={api} | "
-                f"backend={backend} | "
-                f"threads={n_threads}"
-            )
+            worker["pools"].append({
+                "api": api,
+                "backend": backend,
+                "threads": n_threads
+            })
 
             if (
                 api == "blas"
@@ -166,72 +274,62 @@ def inspeccionar(p):
                     int(n_threads)
                 )
 
-    # --------------------------------------------------------
-    # Resumen
-    # --------------------------------------------------------
+        workers.append(
+            worker
+        )
 
     if threads_blas:
 
-        t_blas = max(
+        t = max(
             threads_blas
         )
 
+    else:
+
+        t = None
+
+    if t is not None:
+
         potencial = (
-            p * t_blas
+            p * t
         )
 
-        log()
-        log("RESUMEN")
-
-        log(
-            f"Threads BLAS por proceso: "
-            f"t = {t_blas}"
+        oversubscription = (
+            potencial > P_MAX
         )
 
-        if threads_openmp:
+    else:
 
-            log(
-                f"Threads OpenMP observados: "
-                f"{max(threads_openmp)}"
-            )
+        potencial = None
+        oversubscription = None
 
-        log(
-            f"Paralelismo potencial: "
-            f"p*t = {p}*{t_blas} "
-            f"= {potencial}"
-        )
+    datos = {
+        "tipo": "inspect",
+        "p": p,
+        "t": t,
+        "threads_openmp": (
+            max(threads_openmp)
+            if threads_openmp
+            else None
+        ),
+        "p_t": potencial,
+        "cores_logicos": P_MAX,
+        "oversubscription": oversubscription,
+        "workers": workers
+    }
 
-        log(
-            f"Cores lógicos: {P_MAX}"
-        )
-
-        if potencial > P_MAX:
-
-            log(
-                "Indicio potencial de "
-                "oversubscription: SÍ"
-            )
-
-        else:
-
-            log(
-                "Indicio potencial de "
-                "oversubscription: NO"
-            )
-
-    log()
-
-
-# ============================================================
-# MODO 2: EJECUCIÓN ORIGINAL
-# ============================================================
-
-def ejecutar_original(p):
-
-    from time import (
-        perf_counter,
-        sleep
+    guardar_temporal(
+        datos
     )
+
+
+# ============================================================
+# PROCESO HIJO: EJECUCIÓN ORIGINAL
+# ============================================================
+
+def child_original(p):
+
+    from time import perf_counter
 
     from common import (
         generate_data
@@ -241,21 +339,9 @@ def ejecutar_original(p):
         bootstrap_numpy
     )
 
-    log()
-    log("=" * 70)
-    log(f"EJECUCIÓN ORIGINAL - p = {p}")
-    log("=" * 70)
-
-    log(
-        "Sin límite manual de threads internos."
+    memoria_inicial = (
+        memoria_disponible_mb()
     )
-
-    log(
-        "Mira htop durante esta ejecución."
-    )
-
-    # Da tiempo para mirar htop.
-    sleep(3)
 
     X, y, _ = generate_data()
 
@@ -272,88 +358,88 @@ def ejecutar_original(p):
         - inicio
     )
 
-    log(
-        f"Tiempo original: "
-        f"{tiempo:.2f} s"
+    memoria_final = (
+        memoria_disponible_mb()
     )
 
-    log()
+    datos = {
+        "tipo": "original",
+        "p": p,
+        "t": None,
+        "p_t": None,
+        "cores_logicos": P_MAX,
+        "oversubscription": None,
+        "tiempo": round(
+            tiempo,
+            4
+        ),
+        "estado": "completado",
+        "memoria_inicial_mb": memoria_inicial,
+        "memoria_final_mb": memoria_final
+    }
+
+    guardar_temporal(
+        datos
+    )
 
 
 # ============================================================
-# MODO 3: EJECUCIÓN CORREGIDA t = 1
+# PROCESO HIJO: EJECUCIÓN LIMITADA A t=1
 # ============================================================
 
-def ejecutar_limitado(p):
+def child_limited(p):
 
-    # --------------------------------------------------------
-    # IMPORTANTE:
-    # Estas variables se fijan ANTES de importar NumPy,
-    # common o bs_numpy.
-    # --------------------------------------------------------
+    # Deben fijarse ANTES de importar NumPy
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"
+    os.environ["BLIS_NUM_THREADS"] = "1"
 
-    os.environ[
-        "OMP_NUM_THREADS"
-    ] = "1"
+    from time import perf_counter
 
-    os.environ[
-        "OPENBLAS_NUM_THREADS"
-    ] = "1"
-
-    os.environ[
-        "MKL_NUM_THREADS"
-    ] = "1"
-
-    os.environ[
-        "NUMEXPR_NUM_THREADS"
-    ] = "1"
-
-    os.environ[
-        "BLIS_NUM_THREADS"
-    ] = "1"
-
-    from time import (
-        perf_counter,
-        sleep
-    )
+    import numpy as np
 
     from threadpoolctl import (
-        threadpool_limits
+        threadpool_limits,
+        threadpool_info
     )
 
-    from common import (
-        generate_data
-    )
+    from common import generate_data
+    from bs_numpy import bootstrap_numpy
 
-    from bs_numpy import (
-        bootstrap_numpy
-    )
-
-    log()
-    log("=" * 70)
-    log(
-        f"EJECUCIÓN LIMITADA t=1 - "
-        f"p = {p}"
-    )
-    log("=" * 70)
-
-    log(
-        "Threads internos limitados a t=1."
-    )
-
-    log(
-        "Mira htop durante esta ejecución."
-    )
-
-    sleep(3)
+    memoria_inicial = memoria_disponible_mb()
 
     X, y, _ = generate_data()
 
-    inicio = perf_counter()
+    with threadpool_limits(limits=1):
 
-    with threadpool_limits(
-        limits=1
-    ):
+        # Inicializar BLAS/LAPACK
+        A = np.random.default_rng(123).normal(
+            size=(200, 200)
+        )
+        b = np.random.default_rng(456).normal(
+            size=200
+        )
+
+        _ = np.linalg.solve(A, b)
+
+        # Verificar realmente los threads
+        info = threadpool_info()
+
+        threads_blas = [
+            pool["num_threads"]
+            for pool in info
+            if pool.get("user_api") == "blas"
+        ]
+
+        t_medido = (
+            max(threads_blas)
+            if threads_blas
+            else None
+        )
+
+        inicio = perf_counter()
 
         bootstrap_numpy(
             X,
@@ -361,150 +447,696 @@ def ejecutar_limitado(p):
             p
         )
 
-    tiempo = (
-        perf_counter()
-        - inicio
+        tiempo = perf_counter() - inicio
+
+    memoria_final = memoria_disponible_mb()
+
+    p_t = (
+        p * t_medido
+        if t_medido is not None
+        else None
     )
 
-    log(
-        f"Tiempo con t=1: "
-        f"{tiempo:.2f} s"
-    )
+    datos = {
+        "tipo": "limited",
+        "p": p,
+        "t": t_medido,
+        "p_t": p_t,
+        "cores_logicos": P_MAX,
+        "oversubscription": (
+            p_t > P_MAX
+            if p_t is not None
+            else None
+        ),
+        "tiempo": round(tiempo, 4),
+        "estado": "completado",
+        "memoria_inicial_mb": memoria_inicial,
+        "memoria_final_mb": memoria_final,
+        "threadpool_info": info
+    }
 
-    log()
+    guardar_temporal(datos)
 
 
 # ============================================================
-# RESET
+# EJECUTAR UN PROCESO HIJO CON TIMEOUT
 # ============================================================
 
-def reset():
+def ejecutar_hijo(modo, p, timeout=None):
+
+    TEMP_PATH.unlink(
+        missing_ok=True
+    )
+
+    comando = [
+        sys.executable,
+        str(Path(__file__).resolve()),
+        "--child",
+        modo,
+        str(p)
+    ]
+
+    proceso = subprocess.Popen(
+        comando,
+        start_new_session=True
+    )
+
+    try:
+
+        proceso.wait(
+            timeout=timeout
+        )
+
+    except subprocess.TimeoutExpired:
+
+        # En WSL/Linux se mata todo el grupo,
+        # incluyendo workers de joblib.
+        try:
+
+            os.killpg(
+                os.getpgid(
+                    proceso.pid
+                ),
+                signal.SIGTERM
+            )
+
+        except Exception:
+
+            proceso.kill()
+
+        try:
+
+            proceso.wait(
+                timeout=5
+            )
+
+        except Exception:
+
+            pass
+
+        return {
+            "tipo": modo,
+            "p": p,
+            "t": (
+                1
+                if modo == "limited"
+                else None
+            ),
+            "p_t": (
+                p
+                if modo == "limited"
+                else None
+            ),
+            "cores_logicos": P_MAX,
+            "oversubscription": None,
+            "tiempo": None,
+            "estado": (
+                f"detenido después de "
+                f"{timeout} s"
+            ),
+            "memoria_inicial_mb": None,
+            "memoria_final_mb": None
+        }
+
+    datos = leer_temporal()
+
+    if datos is None:
+
+        return {
+            "tipo": modo,
+            "p": p,
+            "t": None,
+            "p_t": None,
+            "cores_logicos": P_MAX,
+            "oversubscription": None,
+            "tiempo": None,
+            "estado": "error",
+            "memoria_inicial_mb": None,
+            "memoria_final_mb": None
+        }
+
+    return datos
+
+
+# ============================================================
+# GUARDAR CSV
+# ============================================================
+
+def guardar_csv(resultados):
+
+    columnas = [
+        "tipo",
+        "p",
+        "t",
+        "p_t",
+        "cores_logicos",
+        "oversubscription",
+        "tiempo_s",
+        "estado",
+        "memoria_inicial_mb",
+        "memoria_final_mb"
+    ]
+
+    with open(
+        CSV_PATH,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as archivo:
+
+        writer = csv.DictWriter(
+            archivo,
+            fieldnames=columnas
+        )
+
+        writer.writeheader()
+
+        for resultado in resultados:
+
+            writer.writerow({
+                "tipo": resultado.get(
+                    "tipo"
+                ),
+                "p": resultado.get(
+                    "p"
+                ),
+                "t": resultado.get(
+                    "t"
+                ),
+                "p_t": resultado.get(
+                    "p_t"
+                ),
+                "cores_logicos": resultado.get(
+                    "cores_logicos"
+                ),
+                "oversubscription": resultado.get(
+                    "oversubscription"
+                ),
+                "tiempo_s": resultado.get(
+                    "tiempo"
+                ),
+                "estado": resultado.get(
+                    "estado",
+                    ""
+                ),
+                "memoria_inicial_mb": resultado.get(
+                    "memoria_inicial_mb"
+                ),
+                "memoria_final_mb": resultado.get(
+                    "memoria_final_mb"
+                )
+            })
+
+
+# ============================================================
+# ESCRIBIR RESULTADO DE INSPECCIÓN EN TXT
+# ============================================================
+
+def escribir_inspeccion(resultado):
+
+    p = resultado["p"]
+
+    escribir_txt()
+    escribir_txt(
+        "=" * 70
+    )
+    escribir_txt(
+        f"INSPECCIÓN DE THREADS - p = {p}"
+    )
+    escribir_txt(
+        "=" * 70
+    )
+
+    escribir_txt(
+        f"Cores lógicos disponibles: "
+        f"{resultado['cores_logicos']}"
+    )
+
+    for worker in resultado[
+        "workers"
+    ]:
+
+        escribir_txt()
+
+        escribir_txt(
+            f"Worker "
+            f"{worker['worker']} "
+            f"| PID "
+            f"{worker['pid']}"
+        )
+
+        for pool in worker[
+            "pools"
+        ]:
+
+            escribir_txt(
+                f"  API="
+                f"{pool['api']} "
+                f"| backend="
+                f"{pool['backend']} "
+                f"| threads="
+                f"{pool['threads']}"
+            )
+
+    escribir_txt()
+    escribir_txt("RESUMEN")
+
+    escribir_txt(
+        f"Threads internos considerados "
+        f"por proceso: "
+        f"t = {resultado['t']}"
+    )
+
+    escribir_txt(
+        f"Paralelismo potencial: "
+        f"p*t = "
+        f"{resultado['p']}*"
+        f"{resultado['t']} "
+        f"= {resultado['p_t']}"
+    )
+
+    escribir_txt(
+        f"Cores lógicos: "
+        f"{resultado['cores_logicos']}"
+    )
+
+    if resultado[
+        "oversubscription"
+    ]:
+
+        texto = "SÍ"
+
+    else:
+
+        texto = "NO"
+
+    escribir_txt(
+        f"Indicio potencial de "
+        f"oversubscription: {texto}"
+    )
+
+
+# ============================================================
+# ESCRIBIR EJECUCIÓN EN TXT
+# ============================================================
+
+def escribir_ejecucion(resultado):
+
+    modo = resultado[
+        "tipo"
+    ]
+
+    p = resultado[
+        "p"
+    ]
+
+    escribir_txt()
+    escribir_txt(
+        "=" * 70
+    )
+
+    if modo == "original":
+
+        escribir_txt(
+            f"EJECUCIÓN ORIGINAL - p = {p}"
+        )
+
+        escribir_txt(
+            "=" * 70
+        )
+
+        escribir_txt(
+            "Sin límite manual de "
+            "threads internos."
+        )
+
+    else:
+
+        escribir_txt(
+            f"EJECUCIÓN LIMITADA "
+            f"t=1 - p = {p}"
+        )
+
+        escribir_txt(
+            "=" * 70
+        )
+
+        escribir_txt(
+            "Threads internos "
+            "limitados a t=1."
+        )
+
+    escribir_txt(
+        f"Estado: "
+        f"{resultado.get('estado')}"
+    )
+
+    tiempo = resultado.get(
+        "tiempo"
+    )
+
+    if tiempo is not None:
+
+        escribir_txt(
+            f"Tiempo: "
+            f"{tiempo:.2f} s"
+        )
+
+    memoria_inicial = resultado.get(
+        "memoria_inicial_mb"
+    )
+
+    memoria_final = resultado.get(
+        "memoria_final_mb"
+    )
+
+    if memoria_inicial is not None:
+
+        escribir_txt(
+            f"Memoria disponible antes: "
+            f"{memoria_inicial:.2f} MB"
+        )
+
+    if memoria_final is not None:
+
+        escribir_txt(
+            f"Memoria disponible después: "
+            f"{memoria_final:.2f} MB"
+        )
+
+    if modo == "limited":
+
+        escribir_txt(
+            f"p*t = {p}*1 = {p}"
+        )
+
+        escribir_txt(
+            f"Cores lógicos: {P_MAX}"
+        )
+
+
+# ============================================================
+# PROGRAMA PRINCIPAL
+# ============================================================
+
+def main():
 
     RESULTADOS_DIR.mkdir(
         exist_ok=True
     )
 
-    with open(
-        TXT_PATH,
-        "w",
+    # Reiniciar archivos anteriores.
+    TXT_PATH.write_text(
+        "",
         encoding="utf-8"
-    ) as f:
+    )
 
-        f.write(
-            "ÍTEM (e) - "
-            "OVERSUBSCRIPTION EN bs_numpy.py\n"
+    TEMP_PATH.unlink(
+        missing_ok=True
+    )
+
+    escribir_txt(
+        "ÍTEM (e) - OVERSUBSCRIPTION EN bs_numpy.py"
+    )
+
+    escribir_txt(
+        "=" * 70
+    )
+
+    escribir_txt(
+        f"Cores lógicos disponibles: {P_MAX}"
+    )
+
+    escribir_txt(
+        f"Valores de p inspeccionados: "
+        f"{P_INSPECCION}"
+    )
+
+    escribir_txt(
+        f"Valores de p ejecutados: "
+        f"{P_EJECUCION}"
+    )
+
+    escribir_txt(
+        f"Timeout por ejecución: "
+        f"{TIMEOUT_SEGUNDOS} s"
+    )
+
+    escribir_txt()
+    escribir_txt(
+        "Durante las ejecuciones originales "
+        "y limitadas se debe observar htop "
+        "en una segunda terminal."
+    )
+
+    todos_resultados = []
+
+    # --------------------------------------------------------
+    # 1. INSPECCIÓN
+    # --------------------------------------------------------
+
+    escribir_txt()
+    escribir_txt(
+        "#" * 70
+    )
+    escribir_txt(
+        "1. INSPECCIÓN DE THREADS"
+    )
+    escribir_txt(
+        "#" * 70
+    )
+
+    for p in P_INSPECCION:
+
+        resultado = ejecutar_hijo(
+            "inspect",
+            p
         )
 
-        f.write(
-            "=" * 70 + "\n"
+        todos_resultados.append(
+            resultado
         )
 
-        f.write(
-            f"Cores lógicos: {P_MAX}\n"
+        escribir_inspeccion(
+            resultado
         )
 
-    print(
-        f"Archivo reiniciado: "
+    # --------------------------------------------------------
+    # 2. EJECUCIÓN ORIGINAL
+    # --------------------------------------------------------
+
+    escribir_txt()
+    escribir_txt(
+        "#" * 70
+    )
+    escribir_txt(
+        "2. EJECUCIÓN ORIGINAL"
+    )
+    escribir_txt(
+        "#" * 70
+    )
+
+    for p in P_EJECUCION:
+
+        escribir_txt()
+        escribir_txt(
+            f"Iniciando ejecución original "
+            f"con p={p}. "
+            f"Observar htop ahora."
+        )
+
+        resultado = ejecutar_hijo(
+            "original",
+            p,
+            timeout=TIMEOUT_SEGUNDOS
+        )
+
+        todos_resultados.append(
+            resultado
+        )
+
+        escribir_ejecucion(
+            resultado
+        )
+
+    # --------------------------------------------------------
+    # 3. EJECUCIÓN CORREGIDA
+    # --------------------------------------------------------
+
+    escribir_txt()
+    escribir_txt(
+        "#" * 70
+    )
+    escribir_txt(
+        "3. EJECUCIÓN LIMITADA A t=1"
+    )
+    escribir_txt(
+        "#" * 70
+    )
+
+    for p in P_EJECUCION:
+
+        escribir_txt()
+        escribir_txt(
+            f"Iniciando ejecución limitada "
+            f"con p={p}. "
+            f"Observar htop ahora."
+        )
+
+        resultado = ejecutar_hijo(
+            "limited",
+            p,
+            timeout=TIMEOUT_SEGUNDOS
+        )
+
+        todos_resultados.append(
+            resultado
+        )
+
+        escribir_ejecucion(
+            resultado
+        )
+
+    # --------------------------------------------------------
+    # 4. CONCLUSIÓN AUTOMÁTICA
+    # --------------------------------------------------------
+
+    escribir_txt()
+    escribir_txt(
+        "#" * 70
+    )
+    escribir_txt(
+        "4. RESUMEN"
+    )
+    escribir_txt(
+        "#" * 70
+    )
+
+    inspecciones = [
+        r for r in todos_resultados
+        if r.get("tipo") == "inspect"
+    ]
+
+    casos_over = [
+        r["p"]
+        for r in inspecciones
+        if r.get(
+            "oversubscription"
+        )
+    ]
+
+    casos_no_over = [
+        r["p"]
+        for r in inspecciones
+        if r.get(
+            "oversubscription"
+        ) is False
+    ]
+
+    escribir_txt(
+        f"Sin indicio potencial de "
+        f"oversubscription: "
+        f"p = {casos_no_over}"
+    )
+
+    escribir_txt(
+        f"Con indicio potencial de "
+        f"oversubscription: "
+        f"p = {casos_over}"
+    )
+
+    escribir_txt(
+        "Corrección utilizada: "
+        "threadpool_limits(limits=1)."
+    )
+
+    escribir_txt(
+        "Con t=1, el paralelismo potencial "
+        "queda dado por p*t=p."
+    )
+
+    # --------------------------------------------------------
+    # 5. CSV
+    # --------------------------------------------------------
+
+    guardar_csv(
+        todos_resultados
+    )
+
+    escribir_txt()
+    escribir_txt(
+        "=" * 70
+    )
+
+    escribir_txt(
+        "EXPERIMENTO FINALIZADO"
+    )
+
+    escribir_txt(
+        "=" * 70
+    )
+
+    escribir_txt(
+        f"TXT guardado en: "
         f"{TXT_PATH}"
+    )
+
+    escribir_txt(
+        f"CSV guardado en: "
+        f"{CSV_PATH}"
     )
 
 
 # ============================================================
-# MAIN
+# ENTRADA DEL PROGRAMA
 # ============================================================
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 2:
-
-        print(
-            "Uso:"
-        )
-
-        print(
-            "  python experimento_e.py reset"
-        )
-
-        print(
-            "  python experimento_e.py "
-            "inspect <p>"
-        )
-
-        print(
-            "  python experimento_e.py "
-            "original <p>"
-        )
-
-        print(
-            "  python experimento_e.py "
-            "limited <p>"
-        )
-
-        sys.exit(1)
-
-    modo = sys.argv[1]
-
     # --------------------------------------------------------
-    # Reset
+    # Modo interno usado por el proceso principal.
+    # No se ejecuta manualmente.
     # --------------------------------------------------------
-
-    if modo == "reset":
-
-        reset()
-
-        sys.exit(0)
-
-    # --------------------------------------------------------
-    # Los otros modos necesitan p.
-    # --------------------------------------------------------
-
-    if len(sys.argv) != 3:
-
-        print(
-            "Debes indicar un valor de p."
-        )
-
-        sys.exit(1)
-
-    p = int(
-        sys.argv[2]
-    )
 
     if (
-        p < 1
-        or p > P_MAX
+        len(sys.argv) == 4
+        and sys.argv[1] == "--child"
     ):
 
-        print(
-            f"p debe estar entre "
-            f"1 y {P_MAX}."
+        modo = sys.argv[2]
+
+        p = int(
+            sys.argv[3]
         )
 
-        sys.exit(1)
+        if modo == "inspect":
+
+            child_inspect(
+                p
+            )
+
+        elif modo == "original":
+
+            child_original(
+                p
+            )
+
+        elif modo == "limited":
+
+            child_limited(
+                p
+            )
+
+        else:
+
+            raise ValueError(
+                f"Modo desconocido: {modo}"
+            )
 
     # --------------------------------------------------------
-    # Elegir experimento
+    # Ejecución normal.
     # --------------------------------------------------------
-
-    if modo == "inspect":
-
-        inspeccionar(p)
-
-    elif modo == "original":
-
-        ejecutar_original(p)
-
-    elif modo == "limited":
-
-        ejecutar_limitado(p)
 
     else:
 
-        print(
-            "Modo desconocido."
-        )
-
-        print(
-            "Usa: inspect, original "
-            "o limited."
-        )
+        main()
