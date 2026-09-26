@@ -1,0 +1,74 @@
+==========================================================================
+ÍTEM (f) - TIEMPOS DE EJECUCIÓN SEGÚN NÚMERO DE PROCESOS
+==========================================================================
+
+INFORMACIÓN DEL COMPUTADOR
+--------------------------------------------------------------------------
+Procesador: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
+Sistema: Linux 6.18.33.2-microsoft-standard-WSL2
+Número de cores lógicos: 8
+Threads internos máximos por proceso: 1
+
+PARÁMETROS DEL EXPERIMENTO
+--------------------------------------------------------------------------
+N = 100,000 observaciones
+k = 300 variables de entrada
+B = 48 resamples bootstrap
+Valores de p evaluados: 1, 2, ..., 8
+Los threads internos de NumPy/BLAS se fijaron en t = 1 para aislar el efecto del número de procesos p.
+
+TIEMPOS DE EJECUCIÓN
+--------------------------------------------------------------------------
+   p |        NumPy [s] |      sklearn [s] |      Bagging [s]
+--------------------------------------------------------------------------
+   1 |            15.32 |            68.10 |            72.52
+   2 |            12.93 |            54.76 |            61.82
+   3 |            11.06 |            54.95 |            58.13
+   4 |             9.37 |            55.62 |            58.39
+   5 |            11.10 |            94.05 |            71.61
+   6 |            14.14 |            61.08 |            57.52
+   7 |            13.55 |            74.27 |            62.72
+   8 |            17.30 |           122.52 |            79.54
+--------------------------------------------------------------------------
+
+DETALLE POR IMPLEMENTACIÓN
+==========================================================================
+
+NumPy
+-----
+p =  1 -> T(p) = 15.32 s
+p =  2 -> T(p) = 12.93 s
+p =  3 -> T(p) = 11.06 s
+p =  4 -> T(p) = 9.37 s
+p =  5 -> T(p) = 11.10 s
+p =  6 -> T(p) = 14.14 s
+p =  7 -> T(p) = 13.55 s
+p =  8 -> T(p) = 17.30 s
+
+sklearn
+-------
+p =  1 -> T(p) = 68.10 s
+p =  2 -> T(p) = 54.76 s
+p =  3 -> T(p) = 54.95 s
+p =  4 -> T(p) = 55.62 s
+p =  5 -> T(p) = 94.05 s
+p =  6 -> T(p) = 61.08 s
+p =  7 -> T(p) = 74.27 s
+p =  8 -> T(p) = 122.52 s
+
+BaggingRegressor
+----------------
+p =  1 -> T(p) = 72.52 s
+p =  2 -> T(p) = 61.82 s
+p =  3 -> T(p) = 58.13 s
+p =  4 -> T(p) = 58.39 s
+p =  5 -> T(p) = 71.61 s
+p =  6 -> T(p) = 57.52 s
+p =  7 -> T(p) = 62.72 s
+p =  8 -> T(p) = 79.54 s
+
+MEJORES TIEMPOS OBSERVADOS
+--------------------------------------------------------------------------
+NumPy             : 9.37 s con p = 4
+sklearn           : 54.76 s con p = 2
+BaggingRegressor  : 57.52 s con p = 6
