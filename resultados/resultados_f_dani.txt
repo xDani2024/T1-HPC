@@ -1,0 +1,58 @@
+==========================================================================
+ÍTEM (f) - TIEMPOS DE EJECUCIÓN SEGÚN NÚMERO DE PROCESOS
+==========================================================================
+
+INFORMACIÓN DEL COMPUTADOR
+--------------------------------------------------------------------------
+Procesador: Intel(R) Core(TM) i3-8145U CPU @ 2.10GHz
+Sistema: Linux 6.6.114.1-microsoft-standard-WSL2
+Número de cores lógicos: 4
+Threads internos máximos por proceso: 1
+
+PARÁMETROS DEL EXPERIMENTO
+--------------------------------------------------------------------------
+N = 100,000 observaciones
+k = 300 variables de entrada
+B = 48 resamples bootstrap
+Valores de p evaluados: 1, 2, ..., 4
+Los threads internos de NumPy/BLAS se fijaron en t = 1 para aislar el efecto del número de procesos p.
+
+TIEMPOS DE EJECUCIÓN
+--------------------------------------------------------------------------
+   p |        NumPy [s] |      sklearn [s] |      Bagging [s]
+--------------------------------------------------------------------------
+   1 |            31.68 |           121.26 |           144.76
+   2 |            31.88 |           145.76 |           122.42
+   3 |            20.62 |           104.18 |           118.90
+   4 |            18.57 |           182.20 |           127.92
+--------------------------------------------------------------------------
+
+DETALLE POR IMPLEMENTACIÓN
+==========================================================================
+
+NumPy
+-----
+p =  1 -> T(p) = 31.68 s
+p =  2 -> T(p) = 31.88 s
+p =  3 -> T(p) = 20.62 s
+p =  4 -> T(p) = 18.57 s
+
+sklearn
+-------
+p =  1 -> T(p) = 121.26 s
+p =  2 -> T(p) = 145.76 s
+p =  3 -> T(p) = 104.18 s
+p =  4 -> T(p) = 182.20 s
+
+BaggingRegressor
+----------------
+p =  1 -> T(p) = 144.76 s
+p =  2 -> T(p) = 122.42 s
+p =  3 -> T(p) = 118.90 s
+p =  4 -> T(p) = 127.92 s
+
+MEJORES TIEMPOS OBSERVADOS
+--------------------------------------------------------------------------
+NumPy             : 18.57 s con p = 4
+sklearn           : 104.18 s con p = 3
+BaggingRegressor  : 118.90 s con p = 3
