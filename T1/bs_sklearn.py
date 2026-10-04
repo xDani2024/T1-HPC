@@ -4,7 +4,7 @@ from joblib import Parallel, delayed
 from sklearn.linear_model import LinearRegression
 from time import perf_counter
 
-from common import (
+from T1.common import (
     B,
     generate_data,
     generate_bootstrap_seeds,

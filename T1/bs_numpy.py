@@ -3,7 +3,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from time import perf_counter
 
-from common import (
+from T1.common import (
     B,
     generate_data,
     generate_bootstrap_seeds,

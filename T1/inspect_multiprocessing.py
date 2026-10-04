@@ -7,7 +7,7 @@ import numpy as np
 from contextlib import redirect_stdout
 from joblib import Parallel, delayed
 
-from common import generate_data
+from T1.common import generate_data
 
 
 class Tee:

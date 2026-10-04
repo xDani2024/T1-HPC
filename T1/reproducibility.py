@@ -4,10 +4,10 @@ import numpy as np
 
 from contextlib import redirect_stdout
 
-from common import generate_data
-from bs_numpy import bootstrap_numpy
-from bs_sklearn import bootstrap_sklearn
-from bs_auto import bootstrap_auto
+from T1.common import generate_data
+from T1.bs_numpy import bootstrap_numpy
+from T1.bs_sklearn import bootstrap_sklearn
+from T1.bs_auto import bootstrap_auto
 
 
 class Tee:

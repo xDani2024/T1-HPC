@@ -8,13 +8,13 @@ from time import perf_counter, sleep
 
 from threadpoolctl import threadpool_limits
 
-from common import (
+from T1.common import (
     B,
     K,
     N,
     generate_data,
 )
-from bs_numpy import bootstrap_numpy
+from T1.bs_numpy import bootstrap_numpy
 
 
 PAUSA_ENTRE_PRUEBAS = 1.0

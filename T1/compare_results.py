@@ -5,14 +5,14 @@ import numpy as np
 from time import perf_counter
 from contextlib import redirect_stdout
 
-from common import (
+from T1.common import (
     generate_data,
     confidence_interval
 )
 
-from bs_numpy import bootstrap_numpy
-from bs_sklearn import bootstrap_sklearn
-from bs_auto import bootstrap_auto
+from T1.bs_numpy import bootstrap_numpy
+from T1.bs_sklearn import bootstrap_sklearn
+from T1.bs_auto import bootstrap_auto
 
 
 class Tee:

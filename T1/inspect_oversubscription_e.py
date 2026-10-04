@@ -331,11 +331,11 @@ def child_original(p):
 
     from time import perf_counter
 
-    from common import (
+    from T1.common import (
         generate_data
     )
 
-    from bs_numpy import (
+    from T1.bs_numpy import (
         bootstrap_numpy
     )
 
@@ -405,8 +405,8 @@ def child_limited(p):
         threadpool_info
     )
 
-    from common import generate_data
-    from bs_numpy import bootstrap_numpy
+    from T1.common import generate_data
+    from T1.bs_numpy import bootstrap_numpy
 
     memoria_inicial = memoria_disponible_mb()
 

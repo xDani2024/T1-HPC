@@ -7,7 +7,7 @@ from time import perf_counter
 from contextlib import redirect_stdout
 from joblib import Parallel, delayed
 
-from common import (
+from T1.common import (
     B,
     generate_data,
     generate_bootstrap_seeds

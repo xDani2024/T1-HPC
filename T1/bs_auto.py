@@ -4,7 +4,7 @@ from sklearn.ensemble import BaggingRegressor
 from sklearn.linear_model import LinearRegression
 from time import perf_counter
 
-from common import (
+from T1.common import (
     B,
     SEED_BOOTSTRAP,
     generate_data,
