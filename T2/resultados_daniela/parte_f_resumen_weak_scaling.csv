@@ -1,0 +1,7 @@
+Algoritmo,N,p,Tiempo_ms,Eficiencia_Debil,Checksum_Match
+OpenMP Datos,1024,1,585.82,1.0,YES
+OpenMP Datos,2048,8,2421.45,0.2419,YES
+OpenMP D&C,1024,1,421.18,1.0,YES
+OpenMP D&C,2048,8,579.74,0.7265,YES
+Numba,1024,1,559.01,1.0,YES
+Numba,2048,8,2299.36,0.2431,YES

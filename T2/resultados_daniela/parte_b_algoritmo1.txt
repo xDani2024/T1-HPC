@@ -1,0 +1,28 @@
+p=1 repeticion=1
+N=2048 threads=1 tiempo=5059.60 ms checksum=172.331627
+p=1 repeticion=2
+N=2048 threads=1 tiempo=5837.32 ms checksum=172.331627
+p=1 repeticion=3
+N=2048 threads=1 tiempo=5460.37 ms checksum=172.331627
+p=2 repeticion=1
+N=2048 threads=2 tiempo=2655.09 ms checksum=172.331627
+p=2 repeticion=2
+N=2048 threads=2 tiempo=3488.12 ms checksum=172.331627
+p=2 repeticion=3
+N=2048 threads=2 tiempo=3071.74 ms checksum=172.331627
+p=4 repeticion=1
+N=2048 threads=4 tiempo=2706.60 ms checksum=172.331627
+p=4 repeticion=2
+N=2048 threads=4 tiempo=2912.59 ms checksum=172.331627
+p=4 repeticion=3
+N=2048 threads=4 tiempo=2989.49 ms checksum=172.331627
+p=8 repeticion=1
+N=2048 threads=8 tiempo=1621.96 ms checksum=172.331627
+p=8 repeticion=2
+N=2048 threads=8 tiempo=1399.41 ms checksum=172.331627
+p=8 repeticion=3
+N=2048 threads=8 tiempo=2719.51 ms checksum=172.331627
+p=8 repeticion=4
+N=2048 threads=8 tiempo=1954.21 ms checksum=172.331627
+p=8 repeticion=5
+N=2048 threads=8 tiempo=1531.48 ms checksum=172.331627

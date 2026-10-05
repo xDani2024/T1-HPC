@@ -1,0 +1,46 @@
+n=2048 repeticion=1
+N=2048 n=2048 tiempo=4305.22 ms checksum=172.331627
+n=2048 repeticion=2
+N=2048 n=2048 tiempo=4292.05 ms checksum=172.331627
+n=2048 repeticion=3
+N=2048 n=2048 tiempo=4312.88 ms checksum=172.331627
+n=1024 repeticion=1
+N=2048 n=1024 tiempo=4873.93 ms checksum=172.331627
+n=1024 repeticion=2
+N=2048 n=1024 tiempo=4902.23 ms checksum=172.331627
+n=1024 repeticion=3
+N=2048 n=1024 tiempo=4945.59 ms checksum=172.331627
+n=512 repeticion=1
+N=2048 n=512 tiempo=2907.27 ms checksum=172.331627
+n=512 repeticion=2
+N=2048 n=512 tiempo=4181.74 ms checksum=172.331627
+n=512 repeticion=3
+N=2048 n=512 tiempo=3647.96 ms checksum=172.331627
+n=256 repeticion=1
+N=2048 n=256 tiempo=1702.66 ms checksum=172.331627
+n=256 repeticion=2
+N=2048 n=256 tiempo=1750.42 ms checksum=172.331627
+n=256 repeticion=3
+N=2048 n=256 tiempo=1696.68 ms checksum=172.331627
+n=128 repeticion=1
+N=2048 n=128 tiempo=1829.50 ms checksum=172.331627
+n=128 repeticion=2
+N=2048 n=128 tiempo=1821.18 ms checksum=172.331627
+n=128 repeticion=3
+N=2048 n=128 tiempo=1854.69 ms checksum=172.331627
+n=64 repeticion=1
+N=2048 n=64 tiempo=1967.15 ms checksum=172.331627
+n=64 repeticion=2
+N=2048 n=64 tiempo=2014.62 ms checksum=172.331627
+n=64 repeticion=3
+N=2048 n=64 tiempo=2021.61 ms checksum=172.331627
+n=32 repeticion=1
+N=2048 n=32 tiempo=2275.83 ms checksum=172.331627
+n=32 repeticion=2
+N=2048 n=32 tiempo=2276.54 ms checksum=172.331627
+n=32 repeticion=3
+N=2048 n=32 tiempo=2281.54 ms checksum=172.331627
+n=32 repeticion=4
+N=2048 n=32 tiempo=2205.16 ms checksum=172.331627
+n=32 repeticion=5
+N=2048 n=32 tiempo=2228.61 ms checksum=172.331627

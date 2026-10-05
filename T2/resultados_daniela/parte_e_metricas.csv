@@ -1,0 +1,13 @@
+algoritmo,p,tiempo_ms,speedup,eficiencia
+Numba,1,4864.44,1.0,1.0
+Numba,2,2849.96,1.71,0.85
+Numba,4,1205.68,4.03,1.01
+Numba,8,820.03,5.93,0.74
+OpenMP D&C (n=128),1,1957.13,1.0,1.0
+OpenMP D&C (n=128),2,1317.43,1.49,0.74
+OpenMP D&C (n=128),4,759.18,2.58,0.64
+OpenMP D&C (n=128),8,435.72,4.49,0.56
+OpenMP Datos,1,5452.43,1.0,1.0
+OpenMP Datos,2,3071.65,1.78,0.89
+OpenMP Datos,4,2869.56,1.9,0.48
+OpenMP Datos,8,1845.31,2.95,0.37

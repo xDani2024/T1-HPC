@@ -6,7 +6,7 @@ import numpy as np
 
 # Configuration parameters according to task specification
 N = 2048
-N_VALUES = [1024, 512, 256, 128, 64, 32]
+N_VALUES = [2048, 1024, 512, 256, 128, 64, 32]
 P_VALUES = [1, 2, 4, 8]
 REPETITIONS = 3
 EXECUTABLE = "./algoritmo2"

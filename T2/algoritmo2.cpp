@@ -44,10 +44,49 @@ void multiply_leaf(const MatView& A, const MatView& B, const MatView& C) {
 }
 
 // División recursiva en cuadrantes con paralelismo de tareas
+// void multiply_rec_omp(const MatView& A, const MatView& B, const MatView& C, int n) {
+//     int s = C.size;
+    
+//     // Condición de parada (Hoja): resolver en secuencial
+//     if (s <= n) {
+//         multiply_leaf(A, B, C);
+//         return;
+//     }
+
+//     int h = s / 2;
+
+//     // Subproductos independientes para las 4 esquinas de C:
+//     // C11 = A11*B11 + A12*B21
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(0, 0, h), B.sub(0, 0, h), C.sub(0, 0, h), n);
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(0, h, h), B.sub(h, 0, h), C.sub(0, 0, h), n);
+
+//     // C12 = A11*B12 + A12*B22
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(0, 0, h), B.sub(0, h, h), C.sub(0, h, h), n);
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(0, h, h), B.sub(h, h, h), C.sub(0, h, h), n);
+
+//     // C21 = A21*B11 + A22*B21
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(h, 0, h), B.sub(0, 0, h), C.sub(h, 0, h), n);
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(h, h, h), B.sub(h, 0, h), C.sub(h, 0, h), n);
+
+//     // C22 = A21*B12 + A22*B22
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(h, 0, h), B.sub(0, h, h), C.sub(h, h, h), n);
+//     #pragma omp task
+//     multiply_rec_omp(A.sub(h, h, h), B.sub(h, h, h), C.sub(h, h, h), n);
+
+//     // Esperar a que todas las sub-tareas de este nivel terminen
+//     #pragma omp taskwait
+// }
+
 void multiply_rec_omp(const MatView& A, const MatView& B, const MatView& C, int n) {
     int s = C.size;
-    
-    // Condición de parada (Hoja): resolver en secuencial
+
     if (s <= n) {
         multiply_leaf(A, B, C);
         return;
@@ -55,32 +94,45 @@ void multiply_rec_omp(const MatView& A, const MatView& B, const MatView& C, int 
 
     int h = s / 2;
 
-    // Subproductos independientes para las 4 esquinas de C:
-    // C11 = A11*B11 + A12*B21
-    #pragma omp task
-    multiply_rec_omp(A.sub(0, 0, h), B.sub(0, 0, h), C.sub(0, 0, h), n);
-    #pragma omp task
-    multiply_rec_omp(A.sub(0, h, h), B.sub(h, 0, h), C.sub(0, 0, h), n);
+    MatView A11 = A.sub(0, 0, h);
+    MatView A12 = A.sub(0, h, h);
+    MatView A21 = A.sub(h, 0, h);
+    MatView A22 = A.sub(h, h, h);
 
-    // C12 = A11*B12 + A12*B22
-    #pragma omp task
-    multiply_rec_omp(A.sub(0, 0, h), B.sub(0, h, h), C.sub(0, h, h), n);
-    #pragma omp task
-    multiply_rec_omp(A.sub(0, h, h), B.sub(h, h, h), C.sub(0, h, h), n);
+    MatView B11 = B.sub(0, 0, h);
+    MatView B12 = B.sub(0, h, h);
+    MatView B21 = B.sub(h, 0, h);
+    MatView B22 = B.sub(h, h, h);
 
-    // C21 = A21*B11 + A22*B21
-    #pragma omp task
-    multiply_rec_omp(A.sub(h, 0, h), B.sub(0, 0, h), C.sub(h, 0, h), n);
-    #pragma omp task
-    multiply_rec_omp(A.sub(h, h, h), B.sub(h, 0, h), C.sub(h, 0, h), n);
+    MatView C11 = C.sub(0, 0, h);
+    MatView C12 = C.sub(0, h, h);
+    MatView C21 = C.sub(h, 0, h);
+    MatView C22 = C.sub(h, h, h);
 
-    // C22 = A21*B12 + A22*B22
     #pragma omp task
-    multiply_rec_omp(A.sub(h, 0, h), B.sub(0, h, h), C.sub(h, h, h), n);
-    #pragma omp task
-    multiply_rec_omp(A.sub(h, h, h), B.sub(h, h, h), C.sub(h, h, h), n);
+    {
+        multiply_rec_omp(A11, B11, C11, n);
+        multiply_rec_omp(A12, B21, C11, n);
+    }
 
-    // Esperar a que todas las sub-tareas de este nivel terminen
+    #pragma omp task
+    {
+        multiply_rec_omp(A11, B12, C12, n);
+        multiply_rec_omp(A12, B22, C12, n);
+    }
+
+    #pragma omp task
+    {
+        multiply_rec_omp(A21, B11, C21, n);
+        multiply_rec_omp(A22, B21, C21, n);
+    }
+
+    #pragma omp task
+    {
+        multiply_rec_omp(A21, B12, C22, n);
+        multiply_rec_omp(A22, B22, C22, n);
+    }
+
     #pragma omp taskwait
 }
 
@@ -98,7 +150,8 @@ int main(int argc, char** argv) {
 
     MatView Av{ A.data(), N, N }, Bv{ B.data(), N, N }, Cv{ C.data(), N, N };
 
-    auto t0 = std::chrono::high_resolution_clock::now();
+    // auto t0 = std::chrono::high_resolution_clock::now();
+    auto t0 = std::chrono::steady_clock::now();
     
     // Crear la región paralela e invocar la primera tarea desde un único hilo (single)
     #pragma omp parallel
@@ -109,7 +162,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    auto t1 = std::chrono::high_resolution_clock::now();
+    // auto t1 = std::chrono::high_resolution_clock::now();
+    auto t1 = std::chrono::steady_clock::now();
     double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
 
     double checksum = 0.0;
