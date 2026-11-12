@@ -1,0 +1,185 @@
+== job 39281 parte=c config=2 grid=2x2 T=2
+   nodos=ventress ntasks=4 tasks/nodo=4
+   N=8192 b=[4096 2048 1024 512 256 128 64] reps=3  -> resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+      "openblas configuration": "unknown",
+      "openblas configuration": "unknown",
+--- rep=1 b=4096 (t=3s)
+N=8192 b=4096 grid=2x2 p=4 tiempo_global=11.994171 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       2.003038         0.247978     2.254130   ventress
+   1 (0,1)       2.787752         9.193840    11.984146   ventress
+   2 (1,0)       2.309809         9.607873    11.924167   ventress
+   3 (1,1)       6.693444         5.288355    11.994171   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=1 b=2048 (t=21s)
+N=8192 b=2048 grid=2x2 p=4 tiempo_global=6.902751 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       2.530804         3.078905     5.613122   ventress
+   1 (0,1)       3.223753         3.674059     6.902248   ventress
+   2 (1,0)       3.496091         3.385964     6.886752   ventress
+   3 (1,1)       4.470999         2.426377     6.902751   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=1 b=1024 (t=33s)
+N=8192 b=1024 grid=2x2 p=4 tiempo_global=5.698650 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       2.818114         2.684324     5.507185   ventress
+   1 (0,1)       4.544347         1.149722     5.698650   ventress
+   2 (1,0)       3.169441         2.522165     5.695838   ventress
+   3 (1,1)       4.239025         1.455332     5.698590   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=1 b=512 (t=43s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=4.682499 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.456892         1.191301     4.650616   ventress
+   1 (0,1)       3.468403         1.210244     4.681194   ventress
+   2 (1,0)       3.733064         0.944468     4.680696   ventress
+   3 (1,1)       3.847062         0.831084     4.682499   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=1 b=256 (t=52s)
+N=8192 b=256 grid=2x2 p=4 tiempo_global=5.573555 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.761570         1.802691     5.567546   ventress
+   1 (0,1)       4.053624         1.516473     5.573551   ventress
+   2 (1,0)       4.967855         0.602073     5.573428   ventress
+   3 (1,1)       4.876051         0.692179     5.573555   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=1 b=128 (t=63s)
+N=8192 b=128 grid=2x2 p=4 tiempo_global=7.565606 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.310361         2.248710     7.564395   ventress
+   1 (0,1)       7.030320         0.527563     7.565571   ventress
+   2 (1,0)       4.857284         2.702728     7.565556   ventress
+   3 (1,1)       5.445911         2.112860     7.565606   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=1 b=64 (t=75s)
+N=8192 b=64 grid=2x2 p=4 tiempo_global=14.330827 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       7.617485         6.692137    14.330396   ventress
+   1 (0,1)       7.038783         7.280678    14.330827   ventress
+   2 (1,0)       6.844119         7.474417    14.330817   ventress
+   3 (1,1)      13.866413         0.445272    14.330760   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=4096 (t=94s)
+N=8192 b=4096 grid=2x2 p=4 tiempo_global=11.281680 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       2.010077         0.114016     2.127403   ventress
+   1 (0,1)       2.719121         8.558042    11.280365   ventress
+   2 (1,0)       2.410051         8.811464    11.225701   ventress
+   3 (1,1)       6.324375         4.953769    11.281680   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=2048 (t=109s)
+N=8192 b=2048 grid=2x2 p=4 tiempo_global=7.437953 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       2.601859         3.368162     5.974063   ventress
+   1 (0,1)       3.931163         3.501651     7.437486   ventress
+   2 (1,0)       3.084395         4.288388     7.378081   ventress
+   3 (1,1)       4.751402         2.682178     7.437953   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=1024 (t=121s)
+N=8192 b=1024 grid=2x2 p=4 tiempo_global=5.282160 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       2.938372         2.114810     5.058074   ventress
+   1 (0,1)       3.307366         1.969943     5.282160   ventress
+   2 (1,0)       3.859093         1.416304     5.280102   ventress
+   3 (1,1)       4.059308         1.216688     5.282148   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=512 (t=132s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=4.948490 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.193306         1.721309     4.916522   ventress
+   1 (0,1)       3.453520         1.490393     4.946948   ventress
+   2 (1,0)       4.146017         0.797278     4.946430   ventress
+   3 (1,1)       4.258030         0.685339     4.948490   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=256 (t=141s)
+N=8192 b=256 grid=2x2 p=4 tiempo_global=5.700238 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       4.603475         1.087978     5.694737   ventress
+   1 (0,1)       4.252474         1.444181     5.700208   ventress
+   2 (1,0)       4.085176         1.611635     5.700110   ventress
+   3 (1,1)       4.776963         0.918581     5.700238   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=128 (t=151s)
+N=8192 b=128 grid=2x2 p=4 tiempo_global=7.611119 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.239448         2.364936     7.609823   ventress
+   1 (0,1)       6.217671         1.382611     7.611119   ventress
+   2 (1,0)       6.257012         1.348537     7.610999   ventress
+   3 (1,1)       5.657865         1.945407     7.611038   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=2 b=64 (t=163s)
+N=8192 b=64 grid=2x2 p=4 tiempo_global=9.866854 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       8.242959         1.611444     9.866398   ventress
+   1 (0,1)       8.978989         0.867576     9.866854   ventress
+   2 (1,0)       6.696711         3.156589     9.866814   ventress
+   3 (1,1)       9.080667         0.774248     9.866833   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=4096 (t=177s)
+N=8192 b=4096 grid=2x2 p=4 tiempo_global=11.285191 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       1.508873         0.374414     1.886208   ventress
+   1 (0,1)       3.222363         8.055404    11.282129   ventress
+   2 (1,0)       2.398177         8.681278    11.083186   ventress
+   3 (1,1)       5.655463         5.623604    11.285191   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=2048 (t=194s)
+N=8192 b=2048 grid=2x2 p=4 tiempo_global=7.825978 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.513127         3.137737     6.658783   ventress
+   1 (0,1)       4.304503         3.515272     7.825683   ventress
+   2 (1,0)       3.006964         4.721908     7.733827   ventress
+   3 (1,1)       4.275813         3.544350     7.825978   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=1024 (t=207s)
+N=8192 b=1024 grid=2x2 p=4 tiempo_global=5.741582 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.034651         2.474355     5.516057   ventress
+   1 (0,1)       3.843568         1.889584     5.741580   ventress
+   2 (1,0)       3.627536         2.107688     5.739472   ventress
+   3 (1,1)       4.648546         1.086958     5.741582   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=512 (t=217s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=4.665018 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.327835         1.303113     4.632816   ventress
+   1 (0,1)       3.523644         1.136929     4.663542   ventress
+   2 (1,0)       3.479556         1.179879     4.663021   ventress
+   3 (1,1)       3.976813         0.683367     4.665018   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=256 (t=226s)
+N=8192 b=256 grid=2x2 p=4 tiempo_global=5.835149 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       4.698892         1.128165     5.829713   ventress
+   1 (0,1)       4.540739         1.290467     5.835149   ventress
+   2 (1,0)       4.179408         1.652282     5.835052   ventress
+   3 (1,1)       4.892460         0.937995     5.835140   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=128 (t=236s)
+N=8192 b=128 grid=2x2 p=4 tiempo_global=7.303526 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.199724         2.096338     7.302159   ventress
+   1 (0,1)       5.111468         2.185635     7.303526   ventress
+   2 (1,0)       6.641168         0.656091     7.303489   ventress
+   3 (1,1)       5.854275         1.442649     7.303514   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+--- rep=3 b=64 (t=248s)
+N=8192 b=64 grid=2x2 p=4 tiempo_global=10.309027 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       9.064419         1.233712    10.308644   ventress
+   1 (0,1)       8.378975         1.917602    10.308976   ventress
+   2 (1,0)       7.750300         2.545902    10.309000   ventress
+   3 (1,1)       7.426798         2.868950    10.309027   ventress
+Resultados guardados en resultados_cluster/c_cfg2_2x2_T2_n1_39281.csv
+== fin job (262s)
+
+------------------------------------------------------------------------
+[Slurm] Este trabajo (#39281) terminó SIN reporte de rendimiento por correo.
+Puedes recibir un correo con el uso de CPU, RAM y GPU de tus trabajos
+(y sugerencias para que esperen menos en cola) agregando esta línea
+en tu script de sbatch, junto a las líneas #SBATCH:
+
+    #SENDJOBREPORT
+
+Dudas: slurmjobs@cenia.cl
+------------------------------------------------------------------------

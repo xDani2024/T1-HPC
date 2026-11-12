@@ -1,0 +1,77 @@
+== job 39300 parte=e config=5 grid=4x4 T=1
+   nodos=ventress,yodaxico ntasks=16 tasks/nodo=8(x2)
+   N=8192 b=[512 ] reps=3  -> resultados_cluster/e_cfg5_4x4_T1_n2_39300.csv
+      "openblas configuration": "unknown",
+      "openblas configuration": "unknown",
+--- rep=1 b=512 (t=2s)
+N=8192 b=512 grid=4x4 p=16 tiempo_global=5.814611 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       1.279894         4.190508     5.472278   ventress
+   1 (0,1)       1.370702         4.234005     5.606894   ventress
+   2 (0,2)       1.482840         4.238755     5.724006   ventress
+   3 (0,3)       1.579812         4.232628     5.814611   ventress
+   4 (1,0)       1.393353         4.183464     5.579048   ventress
+   5 (1,1)       1.572362         4.032414     5.606946   ventress
+   6 (1,2)       1.655200         4.066593     5.724016   ventress
+   7 (1,3)       1.784144         4.028406     5.814611   ventress
+   8 (2,0)       1.583098         4.112130     5.698283   yodaxico
+   9 (2,1)       1.686957         4.008498     5.697035   yodaxico
+  10 (2,2)       2.179074         3.542499     5.723253   yodaxico
+  11 (2,3)       1.962000         3.850243     5.813820   yodaxico
+  12 (3,0)       1.573328         4.214065     5.790575   yodaxico
+  13 (3,1)       1.864977         3.922844     5.789670   yodaxico
+  14 (3,2)       2.266655         3.521382     5.789665   yodaxico
+  15 (3,3)       1.867868         3.944460     5.813817   yodaxico
+Resultados guardados en resultados_cluster/e_cfg5_4x4_T1_n2_39300.csv
+--- rep=2 b=512 (t=11s)
+N=8192 b=512 grid=4x4 p=16 tiempo_global=5.663088 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       1.282445         4.036050     5.322384   ventress
+   1 (0,1)       1.389490         4.073178     5.464624   ventress
+   2 (0,2)       1.505857         4.062691     5.571037   ventress
+   3 (0,3)       1.573080         4.087348     5.663011   ventress
+   4 (1,0)       1.365020         4.069035     5.436164   ventress
+   5 (1,1)       1.559184         3.903400     5.464622   ventress
+   6 (1,2)       1.682325         3.885470     5.570937   ventress
+   7 (1,3)       1.764375         3.895734     5.663088   ventress
+   8 (2,0)       1.783835         3.758689     5.544090   yodaxico
+   9 (2,1)       1.804698         3.737770     5.544119   yodaxico
+  10 (2,2)       1.897036         3.671664     5.570233   yodaxico
+  11 (2,3)       2.196206         3.464491     5.662219   yodaxico
+  12 (3,0)       1.852056         3.783359     5.636795   yodaxico
+  13 (3,1)       1.874693         3.760933     5.637256   yodaxico
+  14 (3,2)       2.201386         3.434287     5.637260   yodaxico
+  15 (3,3)       2.060267         3.600405     5.662211   yodaxico
+Resultados guardados en resultados_cluster/e_cfg5_4x4_T1_n2_39300.csv
+--- rep=3 b=512 (t=21s)
+N=8192 b=512 grid=4x4 p=16 tiempo_global=5.610328 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       1.295249         3.970125     5.267272   ventress
+   1 (0,1)       1.390426         4.010061     5.402632   ventress
+   2 (0,2)       1.480002         4.036123     5.518378   ventress
+   3 (0,3)       1.586755         4.021469     5.610290   ventress
+   4 (1,0)       1.397337         3.974002     5.373436   ventress
+   5 (1,1)       1.560157         3.840276     5.402668   ventress
+   6 (1,2)       1.680497         3.835590     5.518358   ventress
+   7 (1,3)       1.754062         3.853720     5.610328   ventress
+   8 (2,0)       1.485618         4.005641     5.494886   yodaxico
+   9 (2,1)       1.825486         3.665627     5.492870   yodaxico
+  10 (2,2)       2.031878         3.484113     5.517565   yodaxico
+  11 (2,3)       1.770178         3.837804     5.609494   yodaxico
+  12 (3,0)       1.724116         3.859306     5.586073   yodaxico
+  13 (3,1)       1.831093         3.752722     5.585405   yodaxico
+  14 (3,2)       2.004061         3.579831     5.585414   yodaxico
+  15 (3,3)       2.208390         3.399484     5.609511   yodaxico
+Resultados guardados en resultados_cluster/e_cfg5_4x4_T1_n2_39300.csv
+== fin job (31s)
+
+------------------------------------------------------------------------
+[Slurm] Este trabajo (#39300) terminó SIN reporte de rendimiento por correo.
+Puedes recibir un correo con el uso de CPU, RAM y GPU de tus trabajos
+(y sugerencias para que esperen menos en cola) agregando esta línea
+en tu script de sbatch, junto a las líneas #SBATCH:
+
+    #SENDJOBREPORT
+
+Dudas: slurmjobs@cenia.cl
+------------------------------------------------------------------------

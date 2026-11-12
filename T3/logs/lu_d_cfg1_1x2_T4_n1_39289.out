@@ -1,0 +1,35 @@
+== job 39289 parte=d config=1 grid=1x2 T=4
+   nodos=ventress ntasks=2 tasks/nodo=2
+   N=8192 b=[512 ] reps=3  -> resultados_cluster/d_cfg1_1x2_T4_n1_39289.csv
+      "openblas configuration": "unknown",
+      "openblas configuration": "unknown",
+--- rep=1 b=512 (t=1s)
+N=8192 b=512 grid=1x2 p=2 tiempo_global=4.536639 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.703449         0.826827     4.536639   ventress
+   1 (0,1)       4.142676         0.388267     4.534884   ventress
+Resultados guardados en resultados_cluster/d_cfg1_1x2_T4_n1_39289.csv
+--- rep=2 b=512 (t=10s)
+N=8192 b=512 grid=1x2 p=2 tiempo_global=5.840354 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.036159         0.797164     5.840354   ventress
+   1 (0,1)       5.070794         0.762255     5.838296   ventress
+Resultados guardados en resultados_cluster/d_cfg1_1x2_T4_n1_39289.csv
+--- rep=3 b=512 (t=22s)
+N=8192 b=512 grid=1x2 p=2 tiempo_global=5.145272 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       4.558129         0.580442     5.145272   ventress
+   1 (0,1)       4.425232         0.713533     5.142986   ventress
+Resultados guardados en resultados_cluster/d_cfg1_1x2_T4_n1_39289.csv
+== fin job (33s)
+
+------------------------------------------------------------------------
+[Slurm] Este trabajo (#39289) terminó SIN reporte de rendimiento por correo.
+Puedes recibir un correo con el uso de CPU, RAM y GPU de tus trabajos
+(y sugerencias para que esperen menos en cola) agregando esta línea
+en tu script de sbatch, junto a las líneas #SBATCH:
+
+    #SENDJOBREPORT
+
+Dudas: slurmjobs@cenia.cl
+------------------------------------------------------------------------

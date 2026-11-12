@@ -1,0 +1,65 @@
+== job 39301 parte=f config=2 grid=2x2 T=1
+   nodos=ventress ntasks=4 tasks/nodo=4
+   N=8192 b=[4096 512] reps=3  -> resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+      "openblas configuration": "unknown",
+      "openblas configuration": "unknown",
+--- rep=1 b=4096 (t=1s)
+N=8192 b=4096 grid=2x2 p=4 tiempo_global=18.549734 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.316256         0.117870     3.437160   ventress
+   1 (0,1)       4.392537        14.150685    18.547270   ventress
+   2 (1,0)       3.976419        14.508264    18.488520   ventress
+   3 (1,1)      10.600515         7.944049    18.549734   ventress
+Resultados guardados en resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+--- rep=1 b=512 (t=24s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=7.878417 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.950150         1.880599     7.832874   ventress
+   1 (0,1)       6.514685         1.358450     7.877139   ventress
+   2 (1,0)       6.575456         1.297035     7.876597   ventress
+   3 (1,1)       6.893482         0.980437     7.878417   ventress
+Resultados guardados en resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+--- rep=2 b=4096 (t=36s)
+N=8192 b=4096 grid=2x2 p=4 tiempo_global=18.531184 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.321767         0.116938     3.444781   ventress
+   1 (0,1)       4.375039        14.149695    18.529033   ventress
+   2 (1,0)       4.001531        14.464797    18.470133   ventress
+   3 (1,1)      10.596085         7.930041    18.531184   ventress
+Resultados guardados en resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+--- rep=2 b=512 (t=59s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=8.122952 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       6.015795         2.061755     8.079728   ventress
+   1 (0,1)       6.423125         1.694625     8.121265   ventress
+   2 (1,0)       6.502978         1.614189     8.120765   ventress
+   3 (1,1)       7.017240         1.100752     8.122952   ventress
+Resultados guardados en resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+--- rep=3 b=4096 (t=72s)
+N=8192 b=4096 grid=2x2 p=4 tiempo_global=18.522806 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       3.321478         0.117248     3.441813   ventress
+   1 (0,1)       4.399701        14.116995    18.521015   ventress
+   2 (1,0)       3.977912        14.481202    18.463056   ventress
+   3 (1,1)      10.564461         7.953373    18.522806   ventress
+Resultados guardados en resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+--- rep=3 b=512 (t=95s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=8.056653 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.943595         2.066620     8.012504   ventress
+   1 (0,1)       6.427189         1.624134     8.054898   ventress
+   2 (1,0)       6.434417         1.616537     8.054358   ventress
+   3 (1,1)       7.032917         1.018499     8.056653   ventress
+Resultados guardados en resultados_cluster/f_cfg2_2x2_T1_n1_39301.csv
+== fin job (108s)
+
+------------------------------------------------------------------------
+[Slurm] Este trabajo (#39301) terminó SIN reporte de rendimiento por correo.
+Puedes recibir un correo con el uso de CPU, RAM y GPU de tus trabajos
+(y sugerencias para que esperen menos en cola) agregando esta línea
+en tu script de sbatch, junto a las líneas #SBATCH:
+
+    #SENDJOBREPORT
+
+Dudas: slurmjobs@cenia.cl
+------------------------------------------------------------------------
