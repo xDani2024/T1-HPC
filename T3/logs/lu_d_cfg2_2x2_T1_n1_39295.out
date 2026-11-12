@@ -1,0 +1,41 @@
+== job 39295 parte=d config=2 grid=2x2 T=1
+   nodos=ventress ntasks=4 tasks/nodo=4
+   N=8192 b=[512 ] reps=3  -> resultados_cluster/d_cfg2_2x2_T1_n1_39295.csv
+      "openblas configuration": "unknown",
+      "openblas configuration": "unknown",
+--- rep=1 b=512 (t=1s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=8.139570 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.986498         2.107107     8.095985   ventress
+   1 (0,1)       6.477254         1.657174     8.137943   ventress
+   2 (1,0)       6.453436         1.680326     8.137473   ventress
+   3 (1,1)       7.063501         1.071192     8.139570   ventress
+Resultados guardados en resultados_cluster/d_cfg2_2x2_T1_n1_39295.csv
+--- rep=2 b=512 (t=14s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=7.828697 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.882516         1.899299     7.784120   ventress
+   1 (0,1)       6.583815         1.240033     7.827450   ventress
+   2 (1,0)       6.512334         1.310271     7.826976   ventress
+   3 (1,1)       6.887989         0.936298     7.828697   ventress
+Resultados guardados en resultados_cluster/d_cfg2_2x2_T1_n1_39295.csv
+--- rep=3 b=512 (t=26s)
+N=8192 b=512 grid=2x2 p=4 tiempo_global=8.132046 s
+rank (fila,col)   computo(s)    comunicacion(s)    total(s)
+   0 (0,0)       5.981537         2.104861     8.088710   ventress
+   1 (0,1)       6.483230         1.644314     8.130835   ventress
+   2 (1,0)       6.537829         1.588506     8.130350   ventress
+   3 (1,1)       7.043807         1.083707     8.132046   ventress
+Resultados guardados en resultados_cluster/d_cfg2_2x2_T1_n1_39295.csv
+== fin job (39s)
+
+------------------------------------------------------------------------
+[Slurm] Este trabajo (#39295) terminó SIN reporte de rendimiento por correo.
+Puedes recibir un correo con el uso de CPU, RAM y GPU de tus trabajos
+(y sugerencias para que esperen menos en cola) agregando esta línea
+en tu script de sbatch, junto a las líneas #SBATCH:
+
+    #SENDJOBREPORT
+
+Dudas: slurmjobs@cenia.cl
+------------------------------------------------------------------------

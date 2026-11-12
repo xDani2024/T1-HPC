@@ -1,0 +1,61 @@
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+16:29:06 enviado slurm/jobs_extra/prueba_entorno.sbatch (B_LIST='default') -> job 39242
+39242                     lu_prueba_entorno  COMPLETED   00:01:52 
+Prueba de entorno: 21/21 CHECK OK (ver logs/lu_prueba_entorno_39242.out)
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+18:51:54 enviado slurm/jobs/c_cfg2_2x2_T2_n1.sbatch (B_LIST='default') -> job 39281
+39281                   lu_c_cfg2_2x2_T2_n1  COMPLETED   00:04:22 
+b_a=512  b_c=512  -> B_LIST='512 '
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+18:58:55 enviado slurm/jobs/d_cfg0_1x1_T1_n1.sbatch (B_LIST='512 ') -> job 39282
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+18:58:56 enviado slurm/jobs/d_cfg0_1x1_T2_n1.sbatch (B_LIST='512 ') -> job 39283
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+18:58:56 enviado slurm/jobs/d_cfg0_1x1_T4_n1.sbatch (B_LIST='512 ') -> job 39284
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+18:58:56 enviado slurm/jobs/d_cfg0_1x1_T8_n1.sbatch (B_LIST='512 ') -> job 39285
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:01:17 enviado slurm/jobs/d_cfg1_1x2_T1_n1.sbatch (B_LIST='512 ') -> job 39287
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:02:38 enviado slurm/jobs/d_cfg1_1x2_T2_n1.sbatch (B_LIST='512 ') -> job 39288
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:03:58 enviado slurm/jobs/d_cfg1_1x2_T4_n1.sbatch (B_LIST='512 ') -> job 39289
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:04:58 enviado slurm/jobs/d_cfg1_2x1_T1_n1.sbatch (B_LIST='512 ') -> job 39290
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:05:38 enviado slurm/jobs/d_cfg1_2x1_T2_n1.sbatch (B_LIST='512 ') -> job 39293
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:06:59 enviado slurm/jobs/d_cfg1_2x1_T4_n1.sbatch (B_LIST='512 ') -> job 39294
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:07:39 enviado slurm/jobs/d_cfg2_2x2_T1_n1.sbatch (B_LIST='512 ') -> job 39295
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:08:19 enviado slurm/jobs/d_cfg2_2x2_T2_n1.sbatch (B_LIST='512 ') -> job 39296
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:09:00 enviado slurm/jobs/d_cfg3_2x4_T1_n1.sbatch (B_LIST='512 ') -> job 39297
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:09:40 enviado slurm/jobs/d_cfg3_4x2_T1_n1.sbatch (B_LIST='512 ') -> job 39298
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:10:20 enviado slurm/jobs/e_cfg4_2x4_T1_n2.sbatch (B_LIST='512 ') -> job 39299
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:11:01 enviado slurm/jobs/e_cfg5_4x4_T1_n2.sbatch (B_LIST='512 ') -> job 39300
+sbatch: Nota: algunos nodos pueden tener recursos libres ahora mismo. Ejecuta 'sfree' para ver cuáles están más desocupados y considera usarlos en tus próximos jobs.
+19:11:41 enviado slurm/jobs/f_cfg2_2x2_T1_n1.sbatch (B_LIST='default') -> job 39301
+39282                   lu_d_cfg0_1x1_T1_n1  COMPLETED   00:01:00 
+39283                   lu_d_cfg0_1x1_T2_n1  COMPLETED   00:01:07 
+39284                   lu_d_cfg0_1x1_T4_n1  COMPLETED   00:00:44 
+39285                   lu_d_cfg0_1x1_T8_n1  COMPLETED   00:00:38 
+39287                   lu_d_cfg1_1x2_T1_n1  COMPLETED   00:01:22 
+39288                   lu_d_cfg1_1x2_T2_n1  COMPLETED   00:00:39 
+39289                   lu_d_cfg1_1x2_T4_n1  COMPLETED   00:00:35 
+39290                   lu_d_cfg1_2x1_T1_n1  COMPLETED   00:01:03 
+39293                   lu_d_cfg1_2x1_T2_n1  COMPLETED   00:00:41 
+39294                   lu_d_cfg1_2x1_T4_n1  COMPLETED   00:00:38 
+39295                   lu_d_cfg2_2x2_T1_n1  COMPLETED   00:00:40 
+39296                   lu_d_cfg2_2x2_T2_n1  COMPLETED   00:00:33 
+39297                   lu_d_cfg3_2x4_T1_n1  COMPLETED   00:00:34 
+39298                   lu_d_cfg3_4x2_T1_n1  COMPLETED   00:00:35 
+39299                   lu_e_cfg4_2x4_T1_n2  COMPLETED   00:00:37 
+39300                   lu_e_cfg5_4x4_T1_n2  COMPLETED   00:00:32 
+39301                   lu_f_cfg2_2x2_T1_n1  COMPLETED   00:01:48 
+19:16:03 Listo. CSVs en resultados_cluster/ ; logs en logs/
+Siguiente paso: python3 analisis/analizar.py

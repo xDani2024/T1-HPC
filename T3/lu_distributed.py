@@ -10,6 +10,7 @@ local por proceso. En un paso k, el panel activo es un subarreglo contiguo.
 
 import argparse
 import csv
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -46,8 +47,9 @@ def construir_matriz_local(N, b, myrow, mycol, pr, pc):
 def factorizar(A, N, b, filas, columnas, pr, pc, myrow, mycol,
                row_comm, col_comm):
     """Algoritmo de cuatro etapas: diagonal, paneles, difusion, actualizacion."""
-    t_compute = 0.0
-    t_communication = 0.0
+    # Desglose: diag/panel/update (computo) y bcast_diag/bcast_panel (comunicacion).
+    det = dict(diag=0.0, panel=0.0, update=0.0, bcast_diag=0.0, bcast_panel=0.0,
+               bytes_bcast=0)
     nb = N // b
 
     for k in range(nb):
@@ -68,18 +70,20 @@ def factorizar(A, N, b, filas, columnas, pr, pc, myrow, mycol,
                 raise RuntimeError(f"Se produjo pivoteo en el bloque {k}")
             akk[:] = lu
             diag[:] = lu
-            t_compute += MPI.Wtime() - t0
+            det["diag"] += MPI.Wtime() - t0
 
         # 2) Comunicar bloque LU diagonal a fila r y columna c.
         # row_comm tiene rank local = mycol; col_comm tiene rank local = myrow.
         if myrow == r:
             t0 = MPI.Wtime()
             row_comm.Bcast(diag, root=c)
-            t_communication += MPI.Wtime() - t0
+            det["bcast_diag"] += MPI.Wtime() - t0
+            det["bytes_bcast"] += diag.nbytes
         if mycol == c:
             t0 = MPI.Wtime()
             col_comm.Bcast(diag, root=r)
-            t_communication += MPI.Wtime() - t0
+            det["bcast_diag"] += MPI.Wtime() - t0
+            det["bytes_bcast"] += diag.nbytes
 
         # 3) Calcular paneles de U y L con solve_triangular.
         # Todos los ranks disponen de arreglos del tamano requerido por su fila/col.
@@ -93,7 +97,7 @@ def factorizar(A, N, b, filas, columnas, pr, pc, myrow, mycol,
                 diag, panel, lower=True, unit_diagonal=True, check_finite=False
             )
             U_panel[:] = panel
-            t_compute += MPI.Wtime() - t0
+            det["panel"] += MPI.Wtime() - t0
 
         if mycol == c and L_panel.shape[0] > 0:
             t0 = MPI.Wtime()
@@ -102,26 +106,30 @@ def factorizar(A, N, b, filas, columnas, pr, pc, myrow, mycol,
                 diag, panel.T, trans="T", lower=False, check_finite=False
             ).T
             L_panel[:] = panel
-            t_compute += MPI.Wtime() - t0
+            det["panel"] += MPI.Wtime() - t0
 
         # 4) Difundir panel L por cada fila; panel U por cada columna.
         # Las dimensiones son iguales en los ranks de cada comunicador.
         if L_panel.size:
             t0 = MPI.Wtime()
             row_comm.Bcast(L_panel, root=c)
-            t_communication += MPI.Wtime() - t0
+            det["bcast_panel"] += MPI.Wtime() - t0
+            det["bytes_bcast"] += L_panel.nbytes
         if U_panel.size:
             t0 = MPI.Wtime()
             col_comm.Bcast(U_panel, root=r)
-            t_communication += MPI.Wtime() - t0
+            det["bcast_panel"] += MPI.Wtime() - t0
+            det["bytes_bcast"] += U_panel.nbytes
 
         # 5) Actualizar toda la submatriz local activa con un unico producto.
         if L_panel.shape[0] > 0 and U_panel.shape[1] > 0:
             t0 = MPI.Wtime()
             A[i0:, j0:] -= L_panel @ U_panel
-            t_compute += MPI.Wtime() - t0
+            det["update"] += MPI.Wtime() - t0
 
-    return t_compute, t_communication
+    t_compute = det["diag"] + det["panel"] + det["update"]
+    t_communication = det["bcast_diag"] + det["bcast_panel"]
+    return t_compute, t_communication, det
 
 
 def verificar(N, b, A, filas, columnas, comm):
@@ -166,6 +174,9 @@ def main():
     parser.add_argument("--pc", type=int, default=2)
     parser.add_argument("--check", action="store_true", help="compara con LU serial (N<=512)")
     parser.add_argument("--output", type=str, default=None, help="CSV de tiempos por proceso")
+    parser.add_argument("--parte", type=str, default="", help="etiqueta (c, d, e, f...) para el CSV")
+    parser.add_argument("--config", type=str, default="", help="configuracion de la tabla (0-5)")
+    parser.add_argument("--rep", type=int, default=0, help="numero de repeticion")
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -187,20 +198,21 @@ def main():
     # Sincronizar fuera del intervalo cronometrado.
     comm.Barrier()
     t0 = MPI.Wtime()
-    t_comp, t_comm = factorizar(
+    t_comp, t_comm, det = factorizar(
         A, N, b, filas, columnas, pr, pc, myrow, mycol, row_comm, col_comm
     )
     t_total = MPI.Wtime() - t0
 
-    datos = comm.gather((rank, myrow, mycol, t_comp, t_comm, t_total), root=0)
+    datos = comm.gather((rank, myrow, mycol, t_comp, t_comm, t_total, det,
+                         MPI.Get_processor_name()), root=0)
     errors = verificar(N, b, A, filas, columnas, comm) if args.check else None
 
     if rank == 0:
         global_t = max(t[5] for t in datos)
         print(f"N={N} b={b} grid={pr}x{pc} p={size} tiempo_global={global_t:.6f} s")
         print("rank (fila,col)   computo(s)    comunicacion(s)    total(s)")
-        for rank_i, r_i, c_i, comp_i, comm_i, total_i in datos:
-            print(f"{rank_i:4d} ({r_i},{c_i})   {comp_i:12.6f}   {comm_i:14.6f}   {total_i:10.6f}")
+        for rank_i, r_i, c_i, comp_i, comm_i, total_i, _, host_i in datos:
+            print(f"{rank_i:4d} ({r_i},{c_i})   {comp_i:12.6f}   {comm_i:14.6f}   {total_i:10.6f}   {host_i}")
         if args.check:
             err_serial, err_res = errors
             print(f"error_relativo_vs_serial={err_serial:.3e} residuo_relativo={err_res:.3e}")
@@ -209,12 +221,23 @@ def main():
             print("CHECK: OK")
         if args.output:
             timestamp = datetime.now().isoformat(timespec="seconds")
+            hilos = os.environ.get("OMP_NUM_THREADS", "")
+            nodos = len({d[7] for d in datos})
             registros = [dict(
                 fecha=timestamp, N=N, b=b, pr=pr, pc=pc, procesos=size,
                 rank=rk, fila=rr, columna=cc,
                 computo_s=f"{tc:.9f}", comunicacion_s=f"{tm:.9f}",
                 total_s=f"{tt:.9f}", tiempo_global_s=f"{global_t:.9f}",
-            ) for rk, rr, cc, tc, tm, tt in datos]
+                # Columnas agregadas (no alteran las anteriores).
+                T=hilos, nodos=nodos, host=host, parte=args.parte,
+                config=args.config, rep=args.rep,
+                diag_s=f"{d['diag']:.9f}", panel_s=f"{d['panel']:.9f}",
+                update_s=f"{d['update']:.9f}",
+                bcast_diag_s=f"{d['bcast_diag']:.9f}",
+                bcast_panel_s=f"{d['bcast_panel']:.9f}",
+                bytes_bcast=d["bytes_bcast"],
+                jobid=os.environ.get("SLURM_JOB_ID", ""),
+            ) for rk, rr, cc, tc, tm, tt, d, host in datos]
             guardar_resultados(args.output, registros)
             print(f"Resultados guardados en {args.output}")
 
