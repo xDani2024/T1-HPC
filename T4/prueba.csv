@@ -1,0 +1,2 @@
+Region,W,NumPy (s),JAX (s),NumPy repeticiones (s),JAX repeticiones (s),Estado
+clasica,1024,1.903373968,0.708253107,1.903373968,0.708253107,OK
